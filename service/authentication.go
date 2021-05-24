@@ -32,7 +32,7 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 	} else if core != "K" && core != "S" {
 		res.Response, _ = json.Marshal(newResponse("01", "Bad Request"))
 	} else {
-		gateMsg := transport.SendToGate("gate.shared", "01", req.Params)
+		gateMsg := transport.SendToGate("gate.shared", req.TxType, req.Params)
 		if gateMsg.ResponseCode == "00" {
 
 			claims := new(Claims)

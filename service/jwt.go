@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -49,9 +50,14 @@ func createToken(claims *Claims) (string, error) {
 func getClaims(token string) (*Claims, error) {
 	// Initialize a new instance of `Claims`
 	claims := &Claims{}
+	tokens := strings.Fields(token)
+
+	if len(tokens) != 2 {
+		return claims, errors.New("Unauthorized")
+	}
 
 	// Parse the JWT string and store the result in `claims`.
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	tkn, err := jwt.ParseWithClaims(tokens[1], claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 	if err != nil {
@@ -70,8 +76,8 @@ func getClaims(token string) (*Claims, error) {
 		return nil, errors.New("session expire")
 	}
 
-	if r != token {
-		return nil, errors.New("unauthorized")
+	if r != tokens[1] {
+		return nil, errors.New("Unauthorized")
 	}
 
 	redis.DB.Expire(keyRedis, 30*time.Minute)
