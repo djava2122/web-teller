@@ -7,10 +7,10 @@ import (
 	"gitlab.pactindo.com/backend-svc/common/transport"
 	"gitlab.pactindo.com/backend-svc/common/trycatch"
 
-	"gitlab.pactindo.com/ebanking/web-teller/proto"
+	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 )
 
-func (h *WebTellerHandler) Authentication(ctx context.Context, req *proto.APIREQ, res *proto.APIRES) error {
+func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
 
 	defer func() {
 		log.Infof("[%s] response: %v", req.Headers["Request-ID"], string(res.Response))

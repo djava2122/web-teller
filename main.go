@@ -7,8 +7,9 @@ import (
 	"gitlab.pactindo.com/backend-svc/common/micro"
 	"gitlab.pactindo.com/backend-svc/common/redis"
 
-	"gitlab.pactindo.com/ebanking/web-teller/proto"
 	"gitlab.pactindo.com/ebanking/web-teller/service"
+
+	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 )
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 
 	pg.Init(conf["DB_URL"], 0)*/
 
-	proto.RegisterWebTellerHandler(svc.Server(), new(service.WebTellerHandler))
+	wtproto.RegisterWebTellerHandler(svc.Server(), new(service.WebTellerHandler))
 
 	// Run Service
 	if err := svc.Run(); err != nil {

@@ -6,10 +6,10 @@ import (
 	"gitlab.pactindo.com/backend-svc/common/log"
 	"gitlab.pactindo.com/backend-svc/common/trycatch"
 
-	"gitlab.pactindo.com/ebanking/web-teller/proto"
+	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 )
 
-func (h *WebTellerHandler) SessionValidate(ctx context.Context, req *proto.APIREQ, res *proto.APIRES) error {
+func (h *WebTellerHandler) SessionValidate(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
 
 	defer func() {
 		log.Infof("[%s] response: %v", req.Headers["Request-ID"], string(res.Response))

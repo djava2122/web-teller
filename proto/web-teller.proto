@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package proto;
+package wtproto;
 
 message APIREQ {
     string txType               = 1;
