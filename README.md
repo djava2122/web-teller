@@ -1,3 +1,3 @@
-# Web Teller Service
+# Web Teller
 
 Web Teller Service
