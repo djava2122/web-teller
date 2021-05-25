@@ -11,6 +11,7 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/json-iterator/go v1.1.8
 	github.com/micro/go-micro v1.18.0
+	github.com/valyala/fastjson v1.6.3
 
-	gitlab.pactindo.com/backend-svc/common v0.0.0-20210409083619-b2131b449767
+	gitlab.pactindo.com/backend-svc/common v0.0.0-20210525093752-d96a39797155
 )

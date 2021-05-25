@@ -45,6 +45,18 @@ func (h *WebTellerHandler) PaymentInquiry(_ context.Context, req *wtproto.APIREQ
 			"referenceNumber":   util.PadLeftZero(req.Headers["Request-ID"], 12),
 		})
 		if gateMsg.ResponseCode == "00" {
+
+			switch txType {
+			case "LB": // local biller
+				gateMsg.Data["inquiryData"] = map[string]interface{}{
+					"amount":    gateMsg.Data["amount"],
+					"refnum":    gateMsg.Data["refnum"],
+					"totalBill": gateMsg.Data["totalBill"],
+					"rpTag":     gateMsg.Data["rpTag"],
+					"rpFee":     gateMsg.Data["rpFee"],
+				}
+			}
+
 			res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 		} else {
 			res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
