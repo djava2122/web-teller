@@ -43,6 +43,7 @@ func (h *WebTellerHandler) PaymentInquiry(_ context.Context, req *wtproto.APIREQ
 			"billerProductCode": billerProductCode,
 			"customerId":        customerReference,
 			"referenceNumber":   util.PadLeftZero(req.Headers["Request-ID"], 12),
+			"termType":          "6010",
 		})
 		if gateMsg.ResponseCode == "00" {
 
