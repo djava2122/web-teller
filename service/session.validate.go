@@ -24,7 +24,8 @@ func (h *WebTellerHandler) SessionValidate(ctx context.Context, req *wtproto.API
 
 	token, e := req.Headers["Authorization"]
 	if !e {
-		panic("invalid request header Authorization")
+		res.Response, _ = json.Marshal(newResponse("SE", "invalid session"))
+		return nil
 	}
 
 	// -- get claim data by token jwt

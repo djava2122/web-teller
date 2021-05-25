@@ -55,11 +55,7 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 			data["token"] = token
 			data["tellerName"] = getData(gateMsg.Data, "userName")
 
-			res.Response, _ = json.Marshal(response{
-				Code:    "00",
-				Message: "Success",
-				Data:    data,
-			})
+			res.Response, _ = json.Marshal(successResp(data))
 
 		} else {
 			res.Response, _ = json.Marshal(newResponse("02", "Invalid TellerID or Password"))
