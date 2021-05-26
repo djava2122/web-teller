@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/valyala/fastjson"
 
@@ -34,6 +35,8 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 	if txType == "" || billerCode == "" || billerProductCode == "" || customerReference == "" {
 		res.Response, _ = json.Marshal(newResponse("01", "Bad Request"))
 	} else {
+
+		txDate := time.Now()
 
 		inquiryData := req.Params["inquiryData"]
 		if inquiryData == "" {
@@ -73,6 +76,9 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 
 		gateMsg := transport.SendToGate("gate.shared", req.TxType, params)
 		if gateMsg.ResponseCode == "00" {
+			gateMsg.Data["txDate"] = txDate.Format("20060102 15:04:05")
+			gateMsg.Data["txRefNumber"] = params["referenceNumber"]
+
 			res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 		} else {
 			res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
