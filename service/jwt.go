@@ -7,7 +7,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"gitlab.pactindo.com/backend-svc/common/redis"
+	"gitlab.pactindo.com/ebanking/common/redis"
 )
 
 // Create the JWT key used to create the signature

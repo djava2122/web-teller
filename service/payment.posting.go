@@ -6,10 +6,10 @@ import (
 
 	"github.com/valyala/fastjson"
 
-	"gitlab.pactindo.com/backend-svc/common/log"
-	"gitlab.pactindo.com/backend-svc/common/transport"
-	"gitlab.pactindo.com/backend-svc/common/trycatch"
-	"gitlab.pactindo.com/backend-svc/common/util"
+	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/transport"
+	"gitlab.pactindo.com/ebanking/common/trycatch"
+	"gitlab.pactindo.com/ebanking/common/util"
 
 	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 )

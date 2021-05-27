@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"gitlab.pactindo.com/backend-svc/common/log"
-	"gitlab.pactindo.com/backend-svc/common/transport"
-	"gitlab.pactindo.com/backend-svc/common/trycatch"
+	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/transport"
+	"gitlab.pactindo.com/ebanking/common/trycatch"
 
 	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 )

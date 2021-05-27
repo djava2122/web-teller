@@ -3,9 +3,9 @@ package main
 import (
 	"strconv"
 
-	"gitlab.pactindo.com/backend-svc/common/log"
-	"gitlab.pactindo.com/backend-svc/common/micro"
-	"gitlab.pactindo.com/backend-svc/common/redis"
+	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/micro"
+	"gitlab.pactindo.com/ebanking/common/redis"
 
 	"gitlab.pactindo.com/ebanking/web-teller/service"
 
@@ -36,6 +36,8 @@ func main() {
 	log.InfoS("DB_URL: " + dbURL)
 
 	pg.Init(conf["DB_URL"], 0)*/
+
+	service.Init(svc.Client())
 
 	wtproto.RegisterWebTellerHandler(svc.Server(), new(service.WebTellerHandler))
 
