@@ -1,0 +1,51 @@
+package service
+
+import (
+	"context"
+	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/trycatch"
+	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	"gitlab.pactindo.com/ebanking/web-teller/repo"
+)
+
+func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
+	defer func() {
+		log.Infof("[%s] response: %v", req.Headers["Request-ID"], string(res.Response))
+	}()
+	defer trycatch.Catch(func(e trycatch.Exception) {
+		log.Infof("[%s] error : %v", req.Headers["Request-ID"], e)
+		res.Response, _ = json.Marshal(newResponse("99", "Internal Server Error"))
+	})
+
+	jsonReq, _ := json.Marshal(req.Params)
+	log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
+
+	if req.Params["featureCode"] == "" {
+		res.Response, _ = json.Marshal(newResponse("01", "params featureCode cannot be empty"))
+		return nil
+	}
+
+	if req.Params["startDate"] == "" {
+		res.Response, _ = json.Marshal(newResponse("01", "params startDate cannot be empty"))
+		return nil
+	}
+
+	if req.Params["endDate"] == "" {
+		res.Response, _ = json.Marshal(newResponse("01", "params endDate cannot be empty"))
+		return nil
+	}
+
+	datas, err := repo.Transaction.Filter(req.Params["featureCode"], req.Params["startDate"], req.Params["endDate"])
+	if err != nil {
+		log.Errorf("error get data transaction: %v", err)
+	}
+
+	if len(datas) != 0 {
+		res.Response, _ = json.Marshal(successResp(datas))
+	} else {
+		res.Response, _ = json.Marshal(newResponse("80", "Data Not Found"))
+	}
+
+	return nil
+}
+

@@ -23,7 +23,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		res.Response, _ = json.Marshal(newResponse("99", "Internal Server Error"))
 	})
 
-	jsonReq, _ := json.Marshal(req)
+	jsonReq, _ := json.Marshal(req.Params)
 	log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
 
 	txType := req.Params["txType"]

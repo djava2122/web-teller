@@ -6,6 +6,7 @@ import (
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/micro"
 	"gitlab.pactindo.com/ebanking/common/redis"
+	"gitlab.pactindo.com/ebanking/common/pg"
 
 	"gitlab.pactindo.com/ebanking/web-teller/service"
 
@@ -31,11 +32,11 @@ func main() {
 
 	redis.Init(conf["REDIS_URL"], poolSize)
 
-	/*dbURL := conf["DB_URL"]
+	dbURL := conf["DB_URL"]
 
 	log.InfoS("DB_URL: " + dbURL)
 
-	pg.Init(conf["DB_URL"], 0)*/
+	pg.Init(conf["DB_URL"], 0)
 
 	service.Init(svc.Client())
 

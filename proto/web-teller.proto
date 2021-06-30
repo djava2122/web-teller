@@ -18,4 +18,5 @@ service WebTeller {
     rpc SessionValidate (APIREQ) returns (APIRES);
     rpc PaymentInquiry (APIREQ) returns (APIRES);
     rpc PaymentPosting (APIREQ) returns (APIRES);
+    rpc TransactionReport (APIREQ) returns (APIRES);
 }

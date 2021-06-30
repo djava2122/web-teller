@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"strconv"
 	"time"
 
 	"github.com/valyala/fastjson"
@@ -24,7 +26,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 		res.Response, _ = json.Marshal(newResponse("99", "Internal Server Error"))
 	})
 
-	jsonReq, _ := json.Marshal(req)
+	jsonReq, _ := json.Marshal(req.Params)
 	log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
 
 	txType := req.Params["txType"]
@@ -59,11 +61,12 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 			"core":              req.Params["core"],
 			"tellerID":          req.Params["tellerID"],
 			"tellerPass":        req.Params["tellerPass"],
+			"amount": 			 req.Params["amount"],
 			"txType":            txType,
 			"billerId":          billerCode,
 			"billerProductCode": billerProductCode,
 			"customerId":        customerReference,
-			"referenceNumber":   util.PadLeftZero(req.Headers["Request-ID"], 12),
+			"referenceNumber":   util.RandomNumber(12),
 			"termType":          "6010",
 		}
 		inqDataObj.Visit(func(key []byte, v *fastjson.Value) {
@@ -80,10 +83,47 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 			gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 
 			res.Response, _ = json.Marshal(successResp(gateMsg.Data))
+
+			trxData := BuildDataTransaction(req.Params, params, "SUCCESS")
+
+			err = repo.Transaction.Save(trxData)
+			if err != nil {
+				log.Errorf("error save transaction: %v", err)
+			}
 		} else {
 			res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
+
+			trxData := BuildDataTransaction(req.Params, params, "FAILED")
+
+			err = repo.Transaction.Save(trxData)
+			if err != nil {
+				log.Errorf("error save transaction: %v", err)
+			}
 		}
 	}
 
 	return nil
+}
+
+func BuildDataTransaction(data map[string]string, params map[string]string, status string) repo.MTransaction {
+	trx := repo.MTransaction{}
+	trx.ReferenceNumber = params["referenceNumber"]
+	trx.FeatureId, _ = strconv.Atoi(data["featureId"])
+	trx.FeatureCode, _ = strconv.Atoi(data["featureCode"])
+	trx.FeatureName = data["featureName"]
+	trx.ProductId, _ = strconv.Atoi(data["billerProductId"])
+	trx.ProductCode = data["billerProductCode"]
+	trx.ProductName = data["billerCode"]
+	trx.BillerName = data["billerProductCode"]
+	trx.CustomerReference = data["customerReference"]
+	trx.TransactionDate = time.Now().Format("20060102 15:04:05")
+	trx.TransactionAmount, _ = strconv.ParseFloat(params["amount"], 64)
+	trx.CurrencyCode = "IDR"
+	trx.MerchantType = "6010"
+	trx.Created = time.Now().Format("2006-01-02 15:04:05.000")
+	trx.CreatedBy = data["tellerID"]
+	trx.Updated = time.Now().Format("2006-01-02 15:04:05.000")
+	trx.UpdatedBy = data["tellerID"]
+	trx.TransactionStatus = status
+	return trx
 }
