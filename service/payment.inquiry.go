@@ -102,6 +102,5 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 			res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
 		}
 	}
-
 	return nil
 }
