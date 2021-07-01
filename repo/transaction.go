@@ -72,16 +72,17 @@ func (_ transaction) Save(trx MTransaction) error {
 
 func (_ transaction) Filter(featureCode, startDate, endDate string) (result []TransactionReport, err error) {
 	query := bytes.NewBufferString("select transaction_date,transaction_amount,transaction_status,reference_number,customer_reference,currency_code from t_transaction ")
-	if featureCode != "" {
-		query.WriteString(fmt.Sprintf("WHERE feature_code='%s'", featureCode))
-	}
-	if startDate != "" {
+	if featureCode == "00" {
 		sDate, _ := time.Parse("20060102", startDate)
-		query.WriteString(fmt.Sprintf(" AND created >= '%s'", sDate.Format("2006-01-02")))
-	}
-	if endDate != "" {
+		query.WriteString(fmt.Sprintf(" WHERE created >= '%s'", sDate.Format("2006-01-02")))
 		eDate, _ := time.Parse("20060102", endDate)
 		query.WriteString(fmt.Sprintf(" AND created < '%s'", eDate.Format("2006-01-02")))
+	} else {
+		query.WriteString(fmt.Sprintf("WHERE feature_code='%s'", featureCode))
+		sDate, _ := time.Parse("20060102", startDate)
+		query.WriteString(fmt.Sprintf(" AND created >= '%s'", sDate.Format("2006-01-02")))
+		eDate, _ := time.Parse("20060102", endDate)
+		query.WriteString(fmt.Sprintf(" AND created <= '%s'", eDate.Format("2006-01-02")))
 	}
 
 	query.WriteString(" ORDER BY created DESC")
