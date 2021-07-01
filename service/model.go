@@ -1,22 +1,22 @@
 package service
 
 // response .
-type response struct {
+type response2 struct {
 	Code    string      `json:"code"`
 	Message string      `json:"message"`
 	Token   string      `json:"token,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
 }
 
-func newResponse(code string, message string) response {
-	return response{
+func newResponse(code string, message string) response2 {
+	return response2{
 		Code:    code,
 		Message: message,
 	}
 }
 
-func successResp(data interface{}) response {
-	return response{
+func successResp(data interface{}) response2 {
+	return response2{
 		Code:    "00",
 		Message: "Success",
 		Data:    data,

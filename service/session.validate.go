@@ -33,7 +33,7 @@ func (h *WebTellerHandler) SessionValidate(ctx context.Context, req *wtproto.API
 	if err != nil {
 		res.Response, _ = json.Marshal(newResponse("SE", "invalid session"))
 	} else {
-		res.Response, _ = json.Marshal(response{
+		res.Response, _ = json.Marshal(response2{
 			Code:    "00",
 			Message: "Success",
 			Data:    claim,
