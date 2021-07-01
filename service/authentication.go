@@ -35,27 +35,35 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 		gateMsg := transport.SendToGate("gate.shared", req.TxType, req.Params)
 		if gateMsg.ResponseCode == "00" {
 
-			claims := new(Claims)
-			claims.Core = core
-			claims.TellerID = id
-			claims.TellerPass = pass
-			claims.CoCode = getData(gateMsg.Data, "coCode")
-			claims.TillCoCode = getData(gateMsg.Data, "tillCoCode")
-			claims.CompanyCode = getData(gateMsg.Data, "companyCode")
-			claims.BeginBalance = getData(gateMsg.Data, "saldoAwalHari")
-			claims.CurrentBalance = getData(gateMsg.Data, "saldoSekarang")
+			userInfo := transport.SendToGate("gate.shared", "11", map[string]string{
+				"name": id,
+				"core": core,
+			})
 
-			token, err := createToken(claims)
-			if err != nil {
-				log.Errorf("generate token failed: %v", err)
-				panic(err)
+			if userInfo.ResponseCode == "00" {
+				claims := new(Claims)
+				claims.Core = core
+				claims.TellerID = id
+				claims.TellerPass = pass
+				claims.CoCode = getData(gateMsg.Data, "coCode")
+				claims.TillCoCode = getData(gateMsg.Data, "tillCoCode")
+				claims.CompanyCode = getData(gateMsg.Data, "companyCode")
+				claims.BeginBalance = getData(gateMsg.Data, "saldoAwalHari")
+				claims.CurrentBalance = getData(gateMsg.Data, "saldoSekarang")
+
+				token, err := createToken(claims)
+				if err != nil {
+					log.Errorf("generate token failed: %v", err)
+					panic(err)
+				}
+
+				data := make(map[string]interface{})
+				data["token"] = token
+				data["tellerName"] = getData(gateMsg.Data, "userName")
+				data["role"] = getData(userInfo.Data, "initApp")
+
+				res.Response, _ = json.Marshal(successResp(data))
 			}
-
-			data := make(map[string]interface{})
-			data["token"] = token
-			data["tellerName"] = getData(gateMsg.Data, "userName")
-
-			res.Response, _ = json.Marshal(successResp(data))
 
 		} else {
 			res.Response, _ = json.Marshal(newResponse("02", "Invalid TellerID or Password"))
