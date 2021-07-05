@@ -61,6 +61,7 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 				data["token"] = token
 				data["tellerName"] = getData(gateMsg.Data, "userName")
 				data["role"] = getData(userInfo.Data, "initApp")
+				data["branchCode"] = getData(userInfo.Data, "companyCode")
 
 				res.Response, _ = json.Marshal(successResp(data))
 			}

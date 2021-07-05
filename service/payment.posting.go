@@ -125,5 +125,6 @@ func BuildDataTransaction(data map[string]string, params map[string]string, stat
 	trx.Updated = time.Now().Format("2006-01-02 15:04:05.000")
 	trx.UpdatedBy = data["tellerID"]
 	trx.TransactionStatus = status
+	trx.BranchCode = data["branchCode"]
 	return trx
 }

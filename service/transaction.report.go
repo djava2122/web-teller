@@ -41,11 +41,27 @@ func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.A
 	}
 
 	if len(datas) != 0 {
-		res.Response, _ = json.Marshal(successResp(datas))
+		res.Response, _ = json.Marshal(successResp(ConvertStructTransactionToResult(datas)))
 	} else {
 		res.Response, _ = json.Marshal(newResponse("80", "Data Not Found"))
 	}
 
 	return nil
+}
+
+func ConvertStructTransactionToResult(transaction []repo.MTransaction) []*repo.TransactionReport {
+	var result []*repo.TransactionReport
+	for _, val := range transaction {
+		data := repo.TransactionReport{}
+		data.FeatureName = val.FeatureName
+		data.TransactionDate = FormattedTime(val.TransactionDate, "2006-01-02 15:04:05")
+		data.TransactionAmount = val.TransactionAmount
+		data.TransactionStatus = val.TransactionStatus
+		data.ReferenceNumber = val.ReferenceNumber
+		data.CustomerReference = val.CustomerReference
+		data.CurrencyCode = val.CurrencyCode
+		result = append(result, &data)
+	}
+	return result
 }
 

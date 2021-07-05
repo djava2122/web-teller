@@ -40,6 +40,7 @@ type Filter struct {
 }
 
 type TransactionReport struct {
+	FeatureName 	  string `json:"featureName"`
 	TransactionDate   string  `json:"transactionDate"`
 	TransactionAmount float64 `json:"transactionAmount"`
 	TransactionStatus string  `json:"transactionStatus"`
@@ -56,7 +57,7 @@ func (_ transaction) Save(trx MTransaction) error {
 				biller_name, transaction_date, transaction_amount, merchant_type, currency_code, customer_reference, created, createdby, 
 				updated, updatedby, transaction_status, branch_code
 			) values (
-					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
 			)`
 
 	_, err := pg.DB.Exec(sql,
@@ -72,19 +73,21 @@ func (_ transaction) Save(trx MTransaction) error {
 	return nil
 }
 
-func (_ transaction) Filter(featureCode, startDate, endDate string) (result []TransactionReport, err error) {
-	query := bytes.NewBufferString("select transaction_date,transaction_amount,transaction_status,reference_number,customer_reference,currency_code from t_transaction ")
+func (_ transaction) Filter(featureCode, startDate, endDate string) (result []MTransaction, err error) {
+	query := bytes.NewBufferString("select feature_name,transaction_date,transaction_amount,transaction_status,reference_number,customer_reference,currency_code from t_transaction ")
 	if featureCode == "00" {
 		sDate, _ := time.Parse("20060102", startDate)
 		query.WriteString(fmt.Sprintf(" WHERE created >= '%s'", sDate.Format("2006-01-02")))
 		eDate, _ := time.Parse("20060102", endDate)
+		eDate = eDate.AddDate(0, 0, 1)
 		query.WriteString(fmt.Sprintf(" AND created < '%s'", eDate.Format("2006-01-02")))
 	} else {
 		query.WriteString(fmt.Sprintf("WHERE feature_code='%s'", featureCode))
 		sDate, _ := time.Parse("20060102", startDate)
 		query.WriteString(fmt.Sprintf(" AND created >= '%s'", sDate.Format("2006-01-02")))
 		eDate, _ := time.Parse("20060102", endDate)
-		query.WriteString(fmt.Sprintf(" AND created <= '%s'", eDate.Format("2006-01-02")))
+		eDate = eDate.AddDate(0, 0, 1)
+		query.WriteString(fmt.Sprintf(" AND created < '%s'", eDate.Format("2006-01-02")))
 	}
 
 	query.WriteString(" ORDER BY created DESC")
@@ -95,8 +98,9 @@ func (_ transaction) Filter(featureCode, startDate, endDate string) (result []Tr
 	}
 
 	for rows.Next() {
-		datas := TransactionReport{}
+		datas := MTransaction{}
 		err := rows.Scan(
+			&datas.FeatureName,
 			&datas.TransactionDate,
 			&datas.TransactionAmount,
 			&datas.TransactionStatus,
