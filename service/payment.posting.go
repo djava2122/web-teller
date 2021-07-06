@@ -68,6 +68,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 			"customerId":        customerReference,
 			"referenceNumber":   util.RandomNumber(12),
 			"termType":          "6010",
+			"termId": 			 "WTELLER",
 		}
 		inqDataObj.Visit(func(key []byte, v *fastjson.Value) {
 			if v.Type() == fastjson.TypeString {
