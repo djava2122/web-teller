@@ -38,6 +38,8 @@ type WebTellerService interface {
 	SessionValidate(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	PaymentInquiry(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	PaymentPosting(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
+	TransferInquiry(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
+	TransferPosting(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	TransactionReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 }
 
@@ -99,6 +101,26 @@ func (c *webTellerService) PaymentPosting(ctx context.Context, in *APIREQ, opts 
 	return out, nil
 }
 
+func (c *webTellerService) TransferInquiry(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error) {
+	req := c.c.NewRequest(c.name, "WebTeller.TransferInquiry", in)
+	out := new(APIRES)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *webTellerService) TransferPosting(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error) {
+	req := c.c.NewRequest(c.name, "WebTeller.TransferPosting", in)
+	out := new(APIRES)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *webTellerService) TransactionReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error) {
 	req := c.c.NewRequest(c.name, "WebTeller.TransactionReport", in)
 	out := new(APIRES)
@@ -116,6 +138,8 @@ type WebTellerHandler interface {
 	SessionValidate(context.Context, *APIREQ, *APIRES) error
 	PaymentInquiry(context.Context, *APIREQ, *APIRES) error
 	PaymentPosting(context.Context, *APIREQ, *APIRES) error
+	TransferInquiry(context.Context, *APIREQ, *APIRES) error
+	TransferPosting(context.Context, *APIREQ, *APIRES) error
 	TransactionReport(context.Context, *APIREQ, *APIRES) error
 }
 
@@ -125,6 +149,8 @@ func RegisterWebTellerHandler(s server.Server, hdlr WebTellerHandler, opts ...se
 		SessionValidate(ctx context.Context, in *APIREQ, out *APIRES) error
 		PaymentInquiry(ctx context.Context, in *APIREQ, out *APIRES) error
 		PaymentPosting(ctx context.Context, in *APIREQ, out *APIRES) error
+		TransferInquiry(ctx context.Context, in *APIREQ, out *APIRES) error
+		TransferPosting(ctx context.Context, in *APIREQ, out *APIRES) error
 		TransactionReport(ctx context.Context, in *APIREQ, out *APIRES) error
 	}
 	type WebTeller struct {
@@ -152,6 +178,14 @@ func (h *webTellerHandler) PaymentInquiry(ctx context.Context, in *APIREQ, out *
 
 func (h *webTellerHandler) PaymentPosting(ctx context.Context, in *APIREQ, out *APIRES) error {
 	return h.WebTellerHandler.PaymentPosting(ctx, in, out)
+}
+
+func (h *webTellerHandler) TransferInquiry(ctx context.Context, in *APIREQ, out *APIRES) error {
+	return h.WebTellerHandler.TransferInquiry(ctx, in, out)
+}
+
+func (h *webTellerHandler) TransferPosting(ctx context.Context, in *APIREQ, out *APIRES) error {
+	return h.WebTellerHandler.TransferPosting(ctx, in, out)
 }
 
 func (h *webTellerHandler) TransactionReport(ctx context.Context, in *APIREQ, out *APIRES) error {
