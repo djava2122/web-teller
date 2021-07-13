@@ -85,7 +85,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 
 			res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 
-			trxData := BuildDataTransaction(req.Params, params, "SUCCESS")
+			trxData := BuildDataTransaction(req.Params, params, "SUCCESS", gateMsg.ResponseCode)
 
 			err = repo.Transaction.Save(trxData)
 			if err != nil {
@@ -94,7 +94,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 		} else {
 			res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
 
-			trxData := BuildDataTransaction(req.Params, params, "FAILED")
+			trxData := BuildDataTransaction(req.Params, params, "FAILED", gateMsg.ResponseCode)
 
 			err = repo.Transaction.Save(trxData)
 			if err != nil {
@@ -106,12 +106,14 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 	return nil
 }
 
-func BuildDataTransaction(data map[string]string, params map[string]string, status string) repo.MTransaction {
+func BuildDataTransaction(data map[string]string, params map[string]string, status string, code string) repo.MTransaction {
 	trx := repo.MTransaction{}
 	trx.ReferenceNumber = params["referenceNumber"]
 	trx.FeatureId, _ = strconv.Atoi(data["featureId"])
 	trx.FeatureCode, _ = strconv.Atoi(data["featureCode"])
 	trx.FeatureName = data["featureName"]
+	trx.FeatureGroupCode = data["featureGroupCode"]
+	trx.FeatureGroupName = data["featureGroupName"]
 	trx.ProductId, _ = strconv.Atoi(data["billerProductId"])
 	trx.ProductCode = data["billerProductCode"]
 	trx.ProductName = data["billerCode"]
@@ -127,5 +129,6 @@ func BuildDataTransaction(data map[string]string, params map[string]string, stat
 	trx.UpdatedBy = data["tellerID"]
 	trx.TransactionStatus = status
 	trx.BranchCode = data["branchCode"]
+	trx.ResponseCode = code
 	return trx
 }
