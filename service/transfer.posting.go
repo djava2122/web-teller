@@ -19,13 +19,23 @@ func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIRE
 		res.Response, _ = json.Marshal(newResponse("99", "Internal Server Error"))
 	})
 
+	var srcAccount string
+	switch req.Params["core"] {
+		case "K":
+			srcAccount = "1000000000"
+		case "S":
+			srcAccount = "6000000000"
+		default:
+			srcAccount = "1000000000"
+	}
+
 	params := map[string]string{
-		"core": 			 req.Params["core"],
 		"tellerID":          req.Params["tellerID"],
 		"tellerPass":        req.Params["tellerPass"],
 		"txType":            req.Params["txType"],
 		"amount": 			 req.Params["amount"],
 		"fee":               req.Params["fee"],
+		"srcAccount":		 srcAccount,
 		"destAccount":       req.Params["destAccount"],
 		"referenceNumber":   util.PadLeftZero(req.Headers["Request-ID"], 12),
 		"termType":          "6010",
