@@ -6,6 +6,7 @@ import (
 	"gitlab.pactindo.com/ebanking/common/trycatch"
 	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"strconv"
 )
 
 func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
@@ -20,22 +21,22 @@ func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.A
 	jsonReq, _ := json.Marshal(req.Params)
 	log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
 
-	if req.Params["featureCode"] == "" {
-		res.Response, _ = json.Marshal(newResponse("01", "params featureCode cannot be empty"))
-		return nil
-	}
+	//if req.Params["featureCode"] == "" {
+	//	res.Response, _ = json.Marshal(newResponse("01", "params featureCode cannot be empty"))
+	//	return nil
+	//}
+	//
+	//if req.Params["startDate"] == "" {
+	//	res.Response, _ = json.Marshal(newResponse("01", "params startDate cannot be empty"))
+	//	return nil
+	//}
+	//
+	//if req.Params["endDate"] == "" {
+	//	res.Response, _ = json.Marshal(newResponse("01", "params endDate cannot be empty"))
+	//	return nil
+	//}
 
-	if req.Params["startDate"] == "" {
-		res.Response, _ = json.Marshal(newResponse("01", "params startDate cannot be empty"))
-		return nil
-	}
-
-	if req.Params["endDate"] == "" {
-		res.Response, _ = json.Marshal(newResponse("01", "params endDate cannot be empty"))
-		return nil
-	}
-
-	datas, err := repo.Transaction.Filter(req.Params["featureCode"], req.Params["startDate"], req.Params["endDate"])
+	datas, err := repo.Transaction.Filter(req.Params["teller"])
 	if err != nil {
 		log.Errorf("error get data transaction: %v", err)
 	}
@@ -54,12 +55,17 @@ func ConvertStructTransactionToResult(transaction []repo.MTransaction) []*repo.T
 	for _, val := range transaction {
 		data := repo.TransactionReport{}
 		data.FeatureName = val.FeatureName
+		data.FeatureCode = strconv.Itoa(val.FeatureCode)
+		data.FeatureGroupCode = val.FeatureGroupCode
+		data.FeatureGroupName = val.FeatureGroupName
 		data.TransactionDate = FormattedTime(val.TransactionDate, "2006-01-02 15:04:05")
 		data.TransactionAmount = val.TransactionAmount
 		data.TransactionStatus = val.TransactionStatus
 		data.ReferenceNumber = val.ReferenceNumber
 		data.CustomerReference = val.CustomerReference
 		data.CurrencyCode = val.CurrencyCode
+		data.CreatedBy = val.CreatedBy
+		data.BranchCode = val.BranchCode
 		result = append(result, &data)
 	}
 	return result
