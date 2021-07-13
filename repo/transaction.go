@@ -3,7 +3,6 @@ package repo
 import (
 	"bytes"
 	"fmt"
-	"time"
 
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/pg"
@@ -15,6 +14,8 @@ type MTransaction struct {
 	FeatureId         int     `json:"featureId"`
 	FeatureCode       int     `json:"featureCode"`
 	FeatureName       string  `json:"featureName"`
+	FeatureGroupCode  string  `json:"featureGroupCode"`
+	FeatureGroupName  string  `json:"featureGroupName"`
 	ProductId         int     `json:"productId"`
 	ProductCode       string  `json:"productCode"`
 	ProductName       string  `json:"productName"`
@@ -30,7 +31,8 @@ type MTransaction struct {
 	CreatedBy         string  `json:"createdBy"`
 	Updated           string  `json:"updated"`
 	UpdatedBy         string  `json:"updatedBy"`
-	BranchCode        string  `json:"branch_code"`
+	BranchCode        string  `json:"branchCode"`
+	ResponseCode      string  `json:"responseCode"`
 }
 
 type Filter struct {
@@ -40,13 +42,18 @@ type Filter struct {
 }
 
 type TransactionReport struct {
-	FeatureName 	  string `json:"featureName"`
+	FeatureName       string  `json:"featureName"`
+	FeatureCode       string  `json:"featureCode"`
+	FeatureGroupCode  string  `json:"featureGroupCode"`
+	FeatureGroupName  string  `json:"featureGroupName"`
 	TransactionDate   string  `json:"transactionDate"`
 	TransactionAmount float64 `json:"transactionAmount"`
 	TransactionStatus string  `json:"transactionStatus"`
 	ReferenceNumber   string  `json:"referenceNumber"`
 	CustomerReference string  `json:"customerReference"`
 	CurrencyCode      string  `json:"currencyCode"`
+	CreatedBy         string  `json:"createdBy"`
+	BranchCode        string  `json:"branchCode"`
 }
 
 type transaction struct{}
@@ -55,15 +62,16 @@ func (_ transaction) Save(trx MTransaction) error {
 	sql := `insert into t_transaction (
 				reference_number, feature_id, feature_code, feature_name, product_id, product_code, product_name,
 				biller_name, transaction_date, transaction_amount, merchant_type, currency_code, customer_reference, created, createdby, 
-				updated, updatedby, transaction_status, branch_code
+				updated, updatedby, transaction_status, branch_code, response_code, feature_group_name, feature_group_code
 			) values (
-					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
+					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
 			)`
 
 	_, err := pg.DB.Exec(sql,
 		trx.ReferenceNumber, trx.FeatureId, trx.FeatureCode, trx.FeatureName, trx.ProductId, trx.ProductCode,
 		trx.ProductName, trx.BillerName, trx.TransactionDate, trx.TransactionAmount, trx.MerchantType, trx.CurrencyCode,
-		trx.CustomerReference, trx.Created, trx.CreatedBy, trx.Updated, trx.UpdatedBy, trx.TransactionStatus, trx.BranchCode)
+		trx.CustomerReference, trx.Created, trx.CreatedBy, trx.Updated, trx.UpdatedBy, trx.TransactionStatus, trx.BranchCode,
+		trx.ResponseCode, trx.FeatureGroupName, trx.FeatureGroupCode)
 
 	if err != nil {
 		log.Errorf("OI OI ERROR :", err)
@@ -73,21 +81,10 @@ func (_ transaction) Save(trx MTransaction) error {
 	return nil
 }
 
-func (_ transaction) Filter(featureCode, startDate, endDate string) (result []MTransaction, err error) {
-	query := bytes.NewBufferString("select feature_name,transaction_date,transaction_amount,transaction_status,reference_number,customer_reference,currency_code from t_transaction ")
-	if featureCode == "00" {
-		sDate, _ := time.Parse("20060102", startDate)
-		query.WriteString(fmt.Sprintf(" WHERE created >= '%s'", sDate.Format("2006-01-02")))
-		eDate, _ := time.Parse("20060102", endDate)
-		eDate = eDate.AddDate(0, 0, 1)
-		query.WriteString(fmt.Sprintf(" AND created < '%s'", eDate.Format("2006-01-02")))
-	} else {
-		query.WriteString(fmt.Sprintf("WHERE feature_code='%s'", featureCode))
-		sDate, _ := time.Parse("20060102", startDate)
-		query.WriteString(fmt.Sprintf(" AND created >= '%s'", sDate.Format("2006-01-02")))
-		eDate, _ := time.Parse("20060102", endDate)
-		eDate = eDate.AddDate(0, 0, 1)
-		query.WriteString(fmt.Sprintf(" AND created < '%s'", eDate.Format("2006-01-02")))
+func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
+	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code from t_transaction ")
+	if teller != "" {
+		query.WriteString(fmt.Sprintf(" WHERE createdby = '%s'", teller))
 	}
 
 	query.WriteString(" ORDER BY created DESC")
@@ -101,12 +98,17 @@ func (_ transaction) Filter(featureCode, startDate, endDate string) (result []MT
 		datas := MTransaction{}
 		err := rows.Scan(
 			&datas.FeatureName,
+			&datas.FeatureCode,
+			&datas.FeatureGroupCode,
+			&datas.FeatureGroupName,
 			&datas.TransactionDate,
 			&datas.TransactionAmount,
 			&datas.TransactionStatus,
 			&datas.ReferenceNumber,
 			&datas.CustomerReference,
 			&datas.CurrencyCode,
+			&datas.CreatedBy,
+			&datas.BranchCode,
 		)
 		if err != nil {
 			return nil, err
