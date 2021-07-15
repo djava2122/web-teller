@@ -19,6 +19,9 @@ func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIRE
 		res.Response, _ = json.Marshal(newResponse("99", "Internal Server Error"))
 	})
 
+	jsonReq, _ := json.Marshal(req.Params)
+	log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
+
 	var srcAccount string
 	switch req.Params["core"] {
 		case "K":
@@ -37,7 +40,7 @@ func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIRE
 		"fee":               req.Params["fee"],
 		"srcAccount":		 srcAccount,
 		"destAccount":       req.Params["destAccount"],
-		"referenceNumber":   util.PadLeftZero(req.Headers["Request-ID"], 12),
+		"referenceNumber":   util.RandomNumber(12),
 		"termType":          "6010",
 		"termId": 			 "WTELLER",
 	}
@@ -45,8 +48,10 @@ func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIRE
 	gateMsg := transport.SendToGate("gate.shared", req.TxType, params)
 
 	if gateMsg.ResponseCode == "00" {
-		//gateMsg.Data["txDate"] = txDate.Format("20060102 15:04:05")
-		//gateMsg.Data["txRefNumber"] = params["referenceNumber"]
+		gateMsg.Data = make(map[string]interface{})
+		gateMsg.Data["txDate"] = FormattedTime(req.Params["txDate"], "20060102 15:04:05")
+		gateMsg.Data["txRefNumber"] = params["referenceNumber"]
+		gateMsg.Data["txStatus"] = "SUCCESS"
 
 		res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 
