@@ -21,4 +21,5 @@ service WebTeller {
     rpc TransferInquiry (APIREQ) returns (APIRES);
     rpc TransferPosting (APIREQ) returns (APIRES);
     rpc TransactionReport (APIREQ) returns (APIRES);
+    rpc CashTellerInquiry (APIREQ) returns (APIRES);
 }
