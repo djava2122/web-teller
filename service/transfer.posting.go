@@ -62,6 +62,11 @@ func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIRE
 			log.Errorf("error save transaction: %v", err)
 		}
 	} else {
+		gateMsg.Data = make(map[string]interface{})
+		gateMsg.Data["txDate"] = FormattedTime(req.Params["txDate"], "20060102 15:04:05")
+		gateMsg.Data["txRefNumber"] = params["referenceNumber"]
+		gateMsg.Data["txStatus"] = "FAILED"
+
 		res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
 
 		trxData := BuildDataTransaction(req.Params, params, "FAILED", gateMsg.ResponseCode)
