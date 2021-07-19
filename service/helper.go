@@ -13,3 +13,10 @@ func ParseRoleTeller(data string) string {
 	}
 	return "01"
 }
+
+func ParseRC(rc string) string {
+	if rc == "07" {
+		return "Tanggal Pembayaran Virtual Account telah Berakhir"
+	}
+	return "Undefined Error"
+}

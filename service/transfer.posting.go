@@ -67,7 +67,7 @@ func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIRE
 		gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 		gateMsg.Data["txStatus"] = "FAILED"
 
-		res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
+		res.Response, _ = json.Marshal(newResponseWithData(gateMsg.ResponseCode, ParseRC(gateMsg.ResponseCode), gateMsg.Data))
 
 		trxData := BuildDataTransaction(req.Params, params, "FAILED", gateMsg.ResponseCode)
 
