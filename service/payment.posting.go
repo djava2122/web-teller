@@ -33,20 +33,25 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 	billerCode := req.Params["billerCode"]
 	billerProductCode := req.Params["billerProductCode"]
 	customerReference := req.Params["customerReference"]
+	featureName := req.Params["featureName"]
+	
+	var inqDataObj *fastjson.Object
 
-	if txType == "" || billerCode == "" || billerProductCode == "" || customerReference == "" {
-		res.Response, _ = json.Marshal(newResponse("01", "Bad Request"))
-	} else {
-
-		txDate := time.Now()
-
-		inquiryData := req.Params["inquiryData"]
-		if inquiryData == "" {
-			res.Response, _ = json.Marshal(newResponse("02", "invalid inquiry data"))
-			return nil
+	if featureName != "MPN" {
+		if txType == "" || billerCode == "" || billerProductCode == "" || customerReference == "" {
+			res.Response, _ = json.Marshal(newResponse("01", "Bad Request"))
 		}
+	}
 
-		var inqDataObj *fastjson.Object
+	txDate := time.Now()
+
+	inquiryData := req.Params["inquiryData"]
+	if inquiryData == "" {
+		res.Response, _ = json.Marshal(newResponse("02", "invalid inquiry data"))
+		return nil
+	}
+
+	if featureName != "MPN" {
 		inqData, err := fastjson.Parse(inquiryData)
 		if err == nil {
 			inqDataObj, err = inqData.Object()
@@ -56,20 +61,23 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 			res.Response, _ = json.Marshal(newResponse("02", "invalid inquiry data"))
 			return nil
 		}
+	}
 
-		var params = map[string]string{
-			"core":              req.Params["core"],
-			"tellerID":          req.Params["tellerID"],
-			"tellerPass":        req.Params["tellerPass"],
-			"amount": 			 req.Params["amount"],
-			"txType":            txType,
-			"billerId":          billerCode,
-			"billerProductCode": billerProductCode,
-			"customerId":        customerReference,
-			"referenceNumber":   util.RandomNumber(12),
-			"termType":          "6010",
-			"termId": 			 "WTELLER",
-		}
+	var params = map[string]string{
+		"core":              req.Params["core"],
+		"tellerID":          req.Params["tellerID"],
+		"tellerPass":        req.Params["tellerPass"],
+		"amount": 			 req.Params["amount"],
+		"txType":            txType,
+		"billerId":          billerCode,
+		"billerProductCode": billerProductCode,
+		"customerId":        customerReference,
+		"referenceNumber":   util.RandomNumber(12),
+		"termType":          "6010",
+		"termId": 			 "WTELLER",
+	}
+
+	if featureName != "MPN" {
 		inqDataObj.Visit(func(key []byte, v *fastjson.Value) {
 			if v.Type() == fastjson.TypeString {
 				params[string(key)] = string(v.GetStringBytes())
@@ -77,29 +85,29 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 				params[string(key)] = v.String()
 			}
 		})
+	}
 
-		gateMsg := transport.SendToGate("gate.shared", req.TxType, params)
-		if gateMsg.ResponseCode == "00" {
-			gateMsg.Data["txDate"] = txDate.Format("20060102 15:04:05")
-			gateMsg.Data["txRefNumber"] = params["referenceNumber"]
+	gateMsg := transport.SendToGate("gate.shared", req.TxType, params)
+	if gateMsg.ResponseCode == "00" {
+		gateMsg.Data["txDate"] = txDate.Format("20060102 15:04:05")
+		gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 
-			res.Response, _ = json.Marshal(successResp(gateMsg.Data))
+		res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 
-			trxData := BuildDataTransaction(req.Params, params, "SUCCESS", gateMsg.ResponseCode)
+		trxData := BuildDataTransaction(req.Params, params, "SUCCESS", gateMsg.ResponseCode)
 
-			err = repo.Transaction.Save(trxData)
-			if err != nil {
-				log.Errorf("error save transaction: %v", err)
-			}
-		} else {
-			res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
+		err := repo.Transaction.Save(trxData)
+		if err != nil {
+			log.Errorf("error save transaction: %v", err)
+		}
+	} else {
+		res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
 
-			trxData := BuildDataTransaction(req.Params, params, "FAILED", gateMsg.ResponseCode)
+		trxData := BuildDataTransaction(req.Params, params, "FAILED", gateMsg.ResponseCode)
 
-			err = repo.Transaction.Save(trxData)
-			if err != nil {
-				log.Errorf("error save transaction: %v", err)
-			}
+		err := repo.Transaction.Save(trxData)
+		if err != nil {
+			log.Errorf("error save transaction: %v", err)
 		}
 	}
 
