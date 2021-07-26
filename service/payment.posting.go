@@ -72,6 +72,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 		"billerId":          billerCode,
 		"billerProductCode": billerProductCode,
 		"customerId":        customerReference,
+		"inqData": 			 inquiryData,
 		"referenceNumber":   util.RandomNumber(12),
 		"termType":          "6010",
 		"termId": 			 "WTELLER",
