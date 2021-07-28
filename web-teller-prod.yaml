@@ -4,7 +4,7 @@ metadata:
   namespace: ebanking
   name: web-teller-config
 data:
-  DB_URL: "host=172.20.45.19 user=ebanking password=ebanking dbname=web-teller-api-gw sslmode=disable"
+  DB_URL: "host=172.20.45.19 user=ebanking password=ebanking dbname=web-teller-kvn sslmode=disable"
   REDIS_URL: "redis://172.20.45.20:6379/0"
   REDIS_POOLSIZE: ""
 

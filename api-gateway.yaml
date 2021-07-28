@@ -4,7 +4,7 @@ metadata:
   namespace: ebanking
   name: api-gateway-web-teller
 data:
-  DB_URL: "host=172.20.45.19 user=ebanking password=ibper2021# dbname=ib_kvn_api_gw sslmode=disable"
+  DB_URL: "host=172.20.45.19 user=ebanking password=ibper2021# dbname=web-teller-kvn sslmode=disable"
   BASE_URL: "/web-teller/api"
   CORS_ALLOWED_HEADERS: "*"
   CORS_ALLOWED_ORIGINS: "*"
