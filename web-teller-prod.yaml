@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: ebanking
+  name: web-teller-config
+data:
+  DB_URL: "host=172.20.45.19 user=ebanking password=ebanking dbname=web-teller-api-gw sslmode=disable"
+  REDIS_URL: "redis://172.20.45.20:6379/0"
+  REDIS_POOLSIZE: ""
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ebanking
+  name: web-teller
+spec:
+  selector:
+    matchLabels:
+      app: web-teller
+  minReadySeconds: 10
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-teller
+    spec:
+      imagePullSecrets:
+        - name: nexus
+      containers:
+        - name: web-teller
+          image: nexus.pactindo.com:8443/web-teller/kalsel:1.0
+          imagePullPolicy: IfNotPresent
+          args: ["--server_address", "0.0.0.0:8080"]
+          envFrom:
+            - configMapRef:
+                name: web-teller-config
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime
+          ports:
+            - containerPort: 8080
+              name: internal-port
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Jakarta
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ebanking
+  name: web-teller
+spec:
+  selector:
+    app: web-teller
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: internal-port
