@@ -32,21 +32,21 @@ func (h *WebTellerHandler) CashTellerInquiry(ctx context.Context, req *wtproto.A
 		gateMsg := transport.SendToGate("gate.shared", "10", req.Params)
 		if gateMsg.ResponseCode == "00" {
 
-			userInfo := transport.SendToGate("gate.shared", "11", map[string]string{
-				"name": id,
-				"core": core,
-			})
+			//userInfo := transport.SendToGate("gate.shared", "11", map[string]string{
+			//	"name": id,
+			//	"core": core,
+			//})
 
-			if userInfo.ResponseCode == "00" {
+			//if userInfo.ResponseCode == "00" {
 				data := make(map[string]interface{})
 				data["tellerName"] = getData(gateMsg.Data, "userName")
-				data["role"] = ParseRoleTeller(getData(userInfo.Data, "initApp"))
-				data["branchCode"] = getData(userInfo.Data, "companyCode")
+				data["role"] = ParseRoleTeller(getData(gateMsg.Data, "kdSPV1"))
+				data["branchCode"] = getData(gateMsg.Data, "companyCode")
 				data["beginBalance"] = getData(gateMsg.Data, "saldoAwalHari")
 				data["CurrentBalance"] = getData(gateMsg.Data, "saldoSekarang")
 
 				res.Response, _ = json.Marshal(successResp(data))
-			}
+			//}
 
 		} else {
 			res.Response, _ = json.Marshal(newResponse("02", "Invalid TellerID or Password"))
