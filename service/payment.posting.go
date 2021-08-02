@@ -34,6 +34,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 	billerProductCode := req.Params["billerProductCode"]
 	customerReference := req.Params["customerReference"]
 	featureName := req.Params["featureName"]
+	inquiryData := req.Params["inquiryData"]
 	
 	var inqDataObj *fastjson.Object
 
@@ -45,13 +46,12 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 
 	txDate := time.Now()
 
-	inquiryData := req.Params["inquiryData"]
-	if inquiryData == "" {
-		res.Response, _ = json.Marshal(newResponse("02", "invalid inquiry data"))
-		return nil
-	}
+	if featureName != "MPN" || featureName != "INSTITUSI" {
+		if inquiryData == "" {
+			res.Response, _ = json.Marshal(newResponse("02", "invalid inquiry data"))
+			return nil
+		}
 
-	if featureName != "MPN" {
 		inqData, err := fastjson.Parse(inquiryData)
 		if err == nil {
 			inqDataObj, err = inqData.Object()
@@ -68,6 +68,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 		"tellerID":          req.Params["tellerID"],
 		"tellerPass":        req.Params["tellerPass"],
 		"amount": 			 req.Params["amount"],
+		"fee":               req.Params["fee"],
 		"txType":            txType,
 		"billerId":          billerCode,
 		"billerProductCode": billerProductCode,
