@@ -293,6 +293,7 @@ type ResInqIBFT struct {
 
 type BulkPayment struct {
 	Txtype            string `json:"txType"`
+	DestAccount       string `json:"destAccount"`
 	Amount            string `json:"amount"`
 	Fee               string `json:"fee"`
 	BillerId          string `json:"billerId"`
@@ -300,5 +301,6 @@ type BulkPayment struct {
 	BillerProductCode string `json:"billerProductCode"`
 	CustomerReference string `json:"customerReference"`
 	FeatureName       string `json:"featureName"`
+	FeatureCode 	  string `json:"featureCode"`
 	InquiryData       string `json:"inquiryData"`
 }
