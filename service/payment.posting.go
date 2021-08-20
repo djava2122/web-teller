@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
 	"strconv"
 	"time"
+
+	"gitlab.pactindo.com/ebanking/web-teller/repo"
 
 	"github.com/valyala/fastjson"
 
@@ -35,7 +36,7 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 	customerReference := req.Params["customerReference"]
 	featureName := req.Params["featureName"]
 	inquiryData := req.Params["inquiryData"]
-	
+
 	var inqDataObj *fastjson.Object
 
 	if featureName != "MPN" {
@@ -67,16 +68,16 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 		"core":              req.Params["core"],
 		"tellerID":          req.Params["tellerID"],
 		"tellerPass":        req.Params["tellerPass"],
-		"amount": 			 req.Params["amount"],
+		"amount":            req.Params["amount"],
 		"fee":               req.Params["fee"],
 		"txType":            txType,
 		"billerId":          billerCode,
 		"billerProductCode": billerProductCode,
 		"customerId":        customerReference,
-		"inqData": 			 inquiryData,
+		"inqData":           inquiryData,
 		"referenceNumber":   util.RandomNumber(12),
 		"termType":          "6010",
-		"termId": 			 "WTELLER",
+		"termId":            "WTELLER",
 	}
 
 	if featureName != "MPN" {
@@ -121,14 +122,14 @@ func BuildDataTransaction(data map[string]string, params map[string]string, stat
 	trx.ReferenceNumber = params["referenceNumber"]
 	trx.FeatureId, _ = strconv.Atoi(data["featureId"])
 	trx.FeatureCode, _ = strconv.Atoi(data["featureCode"])
-	trx.FeatureName = data["featureName"]
+	trx.FeatureName = params["featureName"]
 	trx.FeatureGroupCode = data["featureGroupCode"]
 	trx.FeatureGroupName = data["featureGroupName"]
 	trx.ProductId, _ = strconv.Atoi(data["billerProductId"])
 	trx.ProductCode = data["billerProductCode"]
 	trx.ProductName = data["billerCode"]
 	trx.BillerName = data["billerProductCode"]
-	trx.CustomerReference = data["customerReference"]
+	trx.CustomerReference = params["customerId"]
 	trx.TransactionDate = time.Now().Format("20060102 15:04:05")
 	trx.TransactionAmount, _ = strconv.ParseFloat(params["amount"], 64)
 	trx.CurrencyCode = "IDR"

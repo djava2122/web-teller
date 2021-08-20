@@ -43,6 +43,7 @@ type WebTellerService interface {
 	TransferPosting(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	TransactionReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	CashTellerInquiry(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
+	InquiryNomorRekening(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 }
 
 type webTellerService struct {
@@ -153,6 +154,16 @@ func (c *webTellerService) CashTellerInquiry(ctx context.Context, in *APIREQ, op
 	return out, nil
 }
 
+func (c *webTellerService) InquiryNomorRekening(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error) {
+	req := c.c.NewRequest(c.name, "WebTeller.InquiryNomorRekening", in)
+	out := new(APIRES)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for WebTeller service
 
 type WebTellerHandler interface {
@@ -165,6 +176,7 @@ type WebTellerHandler interface {
 	TransferPosting(context.Context, *APIREQ, *APIRES) error
 	TransactionReport(context.Context, *APIREQ, *APIRES) error
 	CashTellerInquiry(context.Context, *APIREQ, *APIRES) error
+	InquiryNomorRekening(context.Context, *APIREQ, *APIRES) error
 }
 
 func RegisterWebTellerHandler(s server.Server, hdlr WebTellerHandler, opts ...server.HandlerOption) error {
@@ -178,6 +190,7 @@ func RegisterWebTellerHandler(s server.Server, hdlr WebTellerHandler, opts ...se
 		TransferPosting(ctx context.Context, in *APIREQ, out *APIRES) error
 		TransactionReport(ctx context.Context, in *APIREQ, out *APIRES) error
 		CashTellerInquiry(ctx context.Context, in *APIREQ, out *APIRES) error
+		InquiryNomorRekening(ctx context.Context, in *APIREQ, out *APIRES) error
 	}
 	type WebTeller struct {
 		webTeller
@@ -224,4 +237,8 @@ func (h *webTellerHandler) TransactionReport(ctx context.Context, in *APIREQ, ou
 
 func (h *webTellerHandler) CashTellerInquiry(ctx context.Context, in *APIREQ, out *APIRES) error {
 	return h.WebTellerHandler.CashTellerInquiry(ctx, in, out)
+}
+
+func (h *webTellerHandler) InquiryNomorRekening(ctx context.Context, in *APIREQ, out *APIRES) error {
+	return h.WebTellerHandler.InquiryNomorRekening(ctx, in, out)
 }
