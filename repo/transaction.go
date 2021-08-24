@@ -35,7 +35,10 @@ type MTransaction struct {
 	ResponseCode      string  `json:"responseCode"`
 	Receipt           string  `json:"receipt"`
 }
-
+type UCetak struct {
+	Id    string `json:"id"`
+	Cetak int    `json:"cetak"`
+}
 type Filter struct {
 	FeatureCode string `json:"featureCode"`
 	StartDate   string `json:"startDate"`
@@ -59,6 +62,21 @@ type TransactionReport struct {
 
 type transaction struct{}
 
+func (_ transaction) Update(trx UCetak) error {
+	sql := `UPDATE t_transaction
+	SET jumlah_cetak = $1
+	WHERE id = $2;`
+
+	ar, err := pg.DB.Exec(sql, trx.Cetak, trx.Id)
+	log.Infof("[%s] Update Table: %v", ar)
+
+	if err != nil {
+		log.Errorf("OI OI ERROR :", err)
+		return err
+	}
+
+	return nil
+}
 func (_ transaction) Save(trx MTransaction) error {
 	sql := `insert into t_transaction (
 				reference_number, feature_id, feature_code, feature_name, product_id, product_code, product_name,

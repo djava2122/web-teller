@@ -35,7 +35,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 	newBulkPayment := make([]model.BulkPayment, 0)
 	gateMsg := transport.GateMsg{}
 	params := map[string]string{}
-
+	core := req.Params["core"]
 	if err := json.Unmarshal([]byte(req.Params["bulk"]), &newBulkPayment); err != nil {
 		log.Infof("Error Unmarshal : ", err.Error())
 		return err
@@ -161,11 +161,11 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					}
 				})
 			}
-			if val.FeatureCode == "404" {
+			if val.FeatureCode == "404" && core == "S" {
 				params["srcAccount"] = val.BillerProductCode
-				params["termId"] = "SWTELLER"
+				params["termId"] = "KWTELLER"
 			}
-			log.Infof("[%s] param: %v", req.Headers["Request-ID"], params)
+			log.Infof("[%s] param Kw: %v", params)
 
 			gateMsg = transport.SendToGate("gate.shared", "12", params)
 		}
