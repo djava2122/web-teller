@@ -48,7 +48,7 @@ func (c *transferHandler) getFeature(featureCode, reqId string) *feature_and_pro
 	return res
 }
 
-func (c *transferHandler) ConfirmTransferOverbook(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
+func (h *WebTellerHandler) ConfirmTransferOverbook(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
 	defer func() {
 		log.Infof("[%s] response: %v", req.Headers["Request-ID"], string(res.Response))
 	}()
@@ -75,15 +75,15 @@ func (c *transferHandler) ConfirmTransferOverbook(ctx context.Context, req *wtpr
 		return nil
 	}
 
-	var reqGetFee = fee.ReqFee{FeatureCode: req.Params["featureCode"]}
-	rF, err := c.feeSrv.GetFeatureFee(context.TODO(), &reqGetFee)
-	if err != nil {
-		panic(err)
-	}
-	if rF.Rc != constant.Success {
-		res.Response = response.InvalidFee()
-		return nil
-	}
+	//var reqGetFee = fee.ReqFee{FeatureCode: req.Params["featureCode"]}
+	//rF, err := c.feeSrv.GetFeatureFee(context.TODO(), &reqGetFee)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//if rF.Rc != constant.Success {
+	//	res.Response = response.InvalidFee()
+	//	return nil
+	//}
 
 	var amount, vatype, feeVa, dueDate string
 	if v, ok := result.Data["amount"].(string); ok {
@@ -98,7 +98,7 @@ func (c *transferHandler) ConfirmTransferOverbook(ctx context.Context, req *wtpr
 	if v, ok := result.Data["fee"].(string); ok {
 		feeVa = v
 	} else {
-		feeVa = strconv.Itoa(int(rF.Fee.Charge))
+		//feeVa = strconv.Itoa(int(rF.Fee.Charge))
 	}
 	var dataResTransfer = model.Transfers{
 		AccNumber: req.Params["destAccNumber"],
