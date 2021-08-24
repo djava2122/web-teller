@@ -18,11 +18,7 @@ require (
 	github.com/valyala/fastjson v1.6.3
 	gitlab.pactindo.com/ebanking/common v0.0.0-20210604040440-119c83dd4cb7
 	gitlab.pactindo.com/ebanking/proto-common v0.0.0-20210604022554-573309e08e1d
-<<<<<<< HEAD
-	gitlab.pactindo.com/ebanking/proto-ibmb v0.0.0-20210701054039-97b0a40cefd3
-=======
 	gitlab.pactindo.com/ebanking/proto-ibmb v0.0.0-20210725170136-02174fa44919
->>>>>>> df75c46279612d443870a748db61ba090770b714
 	gitlab.pactindo.com/ebanking/transfer v0.0.0-20210622063136-d6f67d0fe598
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a // indirect

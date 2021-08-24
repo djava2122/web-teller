@@ -687,13 +687,8 @@ gitlab.pactindo.com/ebanking/proto-common v0.0.0-20210410071444-7937aec6b8c4/go.
 gitlab.pactindo.com/ebanking/proto-common v0.0.0-20210604022554-573309e08e1d h1:/877EvEngb4+wWTD67qHa5n4YcQkQV6TVPs9bkcZ8kQ=
 gitlab.pactindo.com/ebanking/proto-common v0.0.0-20210604022554-573309e08e1d/go.mod h1:mRzeRirlckbqfgwf5NQGmP462CpFzO+uLp5pqEyzZzQ=
 gitlab.pactindo.com/ebanking/proto-ibmb v0.0.0-20210603064606-195786dbb74c/go.mod h1:9nODM8rsXicD3UKzIwhYdoOfNha+bGD+aQYWnQcVVak=
-<<<<<<< HEAD
-gitlab.pactindo.com/ebanking/proto-ibmb v0.0.0-20210701054039-97b0a40cefd3 h1:wMUzRobk/2k7vEd4MPNOPLWdxybjuT1IleCBYJwS2h8=
-gitlab.pactindo.com/ebanking/proto-ibmb v0.0.0-20210701054039-97b0a40cefd3/go.mod h1:9nODM8rsXicD3UKzIwhYdoOfNha+bGD+aQYWnQcVVak=
-=======
 gitlab.pactindo.com/ebanking/proto-ibmb v0.0.0-20210725170136-02174fa44919 h1:N0yvspzjeE07Li//0t1oTOhWLz0vri9h+0h8bqXTyhE=
 gitlab.pactindo.com/ebanking/proto-ibmb v0.0.0-20210725170136-02174fa44919/go.mod h1:9nODM8rsXicD3UKzIwhYdoOfNha+bGD+aQYWnQcVVak=
->>>>>>> df75c46279612d443870a748db61ba090770b714
 gitlab.pactindo.com/ebanking/transfer v0.0.0-20210622063136-d6f67d0fe598 h1:N5TAFVAtXUijBxBH4ECR3C8kHHHNzzvpFusdrt6Uznk=
 gitlab.pactindo.com/ebanking/transfer v0.0.0-20210622063136-d6f67d0fe598/go.mod h1:7kfqDwaupTp6kD6ioASkzGYtiW16PHs3+o+/kMqDoQI=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
