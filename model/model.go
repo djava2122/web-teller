@@ -294,13 +294,23 @@ type ResInqIBFT struct {
 type BulkPayment struct {
 	Txtype            string `json:"txType"`
 	DestAccount       string `json:"destAccount"`
-	Amount            string `json:"amount"`
+	Amount            string `json:"Amount"`
+	TxAmount          string `json:"txAmount"`
 	Fee               string `json:"fee"`
-	BillerId          string `json:"billerId"`
+	BillerId          string `json:"billerProductId"`
 	BillerCode        string `json:"billerCode"`
 	BillerProductCode string `json:"billerProductCode"`
 	CustomerReference string `json:"customerReference"`
 	FeatureName       string `json:"featureName"`
-	FeatureCode 	  string `json:"featureCode"`
+	FeatureId         string `json:"featureId"`
+	FeatureCode       string `json:"featureCode"`
+	FeatureGroupName  string `json:"featureGroupName"`
+	FeatureGroupCode  string `json:"featureGroupCode"`
 	InquiryData       string `json:"inquiryData"`
+	PaymentOptions    string `json:"paymentOptions"`
+	Refnum            string `json:"refnum"`
+	RpFee             string `json:"rpFee"`
+	RpFeeStruk        string `json:"rpFeeStruk"`
+	RpTag             string `json:"rpTag"`
+	TotalBill         string `json:"totalBill"`
 }

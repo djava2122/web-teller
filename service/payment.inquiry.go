@@ -64,7 +64,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		"customerId":        customerReference,
 		"referenceNumber":   util.RandomNumber(12),
 		"termType":          "6010",
-		"termId": 			 "WTELLER",
+		"termId":            "WTELLER",
 	})
 	if gateMsg.ResponseCode == "00" {
 
@@ -98,6 +98,8 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 				"fee":     fee,
 			}
 			delete(gateMsg.Data, "inqData")
+		default:
+			gateMsg.Data["txFee"] = strconv.Itoa(fee)
 		}
 
 		res.Response, _ = json.Marshal(successResp(gateMsg.Data))
