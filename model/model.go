@@ -302,7 +302,10 @@ type BulkPayment struct {
 	BillerProductCode string `json:"billerProductCode"`
 	CustomerReference string `json:"customerReference"`
 	FeatureName       string `json:"featureName"`
+	FeatureId         string `json:"featureId"`
 	FeatureCode       string `json:"featureCode"`
+	FeatureGroupName  string `json:"featureGroupName"`
+	FeatureGroupCode  string `json:"featureGroupCode"`
 	InquiryData       string `json:"inquiryData"`
 	PaymentOptions    string `json:"paymentOptions"`
 	Refnum            string `json:"refnum"`

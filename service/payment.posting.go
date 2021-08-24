@@ -120,15 +120,15 @@ func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ
 func BuildDataTransaction(data map[string]string, params map[string]string, status string, code string) repo.MTransaction {
 	trx := repo.MTransaction{}
 	trx.ReferenceNumber = params["referenceNumber"]
-	trx.FeatureId, _ = strconv.Atoi(data["featureId"])
-	trx.FeatureCode, _ = strconv.Atoi(data["featureCode"])
+	trx.FeatureId, _ = strconv.Atoi(params["featureId"])
+	trx.FeatureCode, _ = strconv.Atoi(params["featureCode"])
 	trx.FeatureName = params["featureName"]
-	trx.FeatureGroupCode = data["featureGroupCode"]
-	trx.FeatureGroupName = data["featureGroupName"]
-	trx.ProductId, _ = strconv.Atoi(data["billerProductId"])
-	trx.ProductCode = data["billerProductCode"]
-	trx.ProductName = data["billerCode"]
-	trx.BillerName = data["billerProductCode"]
+	trx.FeatureGroupCode = params["featureGroupCode"]
+	trx.FeatureGroupName = params["featureGroupName"]
+	trx.ProductId, _ = strconv.Atoi(params["billerProductId"])
+	trx.ProductCode = params["billerCode"]
+	trx.ProductName = params["billerCode"]
+	trx.BillerName = params["billerProductCode"]
 	trx.CustomerReference = params["customerId"]
 	trx.TransactionDate = time.Now().Format("20060102 15:04:05")
 	trx.TransactionAmount, _ = strconv.ParseFloat(params["amount"], 64)
@@ -139,7 +139,9 @@ func BuildDataTransaction(data map[string]string, params map[string]string, stat
 	trx.Updated = time.Now().Format("2006-01-02 15:04:05.000")
 	trx.UpdatedBy = data["tellerID"]
 	trx.TransactionStatus = status
-	trx.BranchCode = data["branchCode"]
+	trx.BranchCode = params["branchCode"]
 	trx.ResponseCode = code
+	trx.Receipt = params["receipt"]
+	log.Infof("asasaaasas:", trx)
 	return trx
 }

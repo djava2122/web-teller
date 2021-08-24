@@ -195,18 +195,21 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				gateMsg.Data["txStatus"] = "SUCCESS"
 
 			}
-
+			dataReceipt, _ := json.Marshal(gateMsg.Data["receipt"])
+			log.Infof("Data test Response:", dataReceipt)
 			newDataTrx = append(newDataTrx, gateMsg.Data)
 			//res.Response, _ = json.Marshal(successResp(gateMsg.Data))
-
+			params["featureGroupCode"] = val.FeatureGroupCode
+			params["featureGroupName"] = val.FeatureGroupName
 			params["customerId"] = val.CustomerReference
 			params["featureName"] = val.FeatureName
-			trxData := BuildDataTransaction(req.Params, params, "SUCCESS", gateMsg.ResponseCode)
+			params["featureCode"] = val.FeatureCode
+			params["productCode"] = val.BillerCode
+			params["featureId"] = val.FeatureId
+			params["branchCode"] = req.Params["branchCode"]
+			params["receipt"] = string(dataReceipt)
+			params["txStatus"] = "SUCCESS"
 
-			err := repo.Transaction.Save(trxData)
-			if err != nil {
-				log.Errorf("error save transaction: %v", err)
-			}
 		} else {
 			gateMsg.Data = make(map[string]interface{})
 			gateMsg.Data["txDate"] = FormattedTime(req.Params["txDate"], "20060102 15:04:05")
@@ -220,18 +223,23 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			newDataTrx = append(newDataTrx, gateMsg.Data)
 
 			//res.Response, _ = json.Marshal(newResponseWithData(gateMsg.ResponseCode, ParseRC(gateMsg.ResponseCode), gateMsg.Data))
-			params["featureName"] = val.FeatureName
-			params["featureCode"] = val.FeatureCode
+			params["featureGroupCode"] = val.FeatureGroupCode
+			params["featureGroupName"] = val.FeatureGroupName
 			params["customerId"] = val.CustomerReference
 			params["featureName"] = val.FeatureName
-			trxData := BuildDataTransaction(req.Params, params, "FAILED", gateMsg.ResponseCode)
+			params["featureCode"] = val.FeatureCode
+			params["productCode"] = val.BillerCode
+			params["featureId"] = val.FeatureId
+			params["branchCode"] = req.Params["branchCode"]
+			params["txStatus"] = "FAILED"
 
-			err := repo.Transaction.Save(trxData)
-			if err != nil {
-				log.Errorf("error save transaction: %v", err)
-			}
 		}
+		trxData := BuildDataTransaction(req.Params, params, params["txStatus"], gateMsg.ResponseCode)
 
+		err := repo.Transaction.Save(trxData)
+		if err != nil {
+			log.Errorf("error save transaction: %v", err)
+		}
 		res.Response, _ = json.Marshal(successResp(newDataTrx))
 	}
 	return nil
