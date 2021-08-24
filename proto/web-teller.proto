@@ -24,5 +24,6 @@ service WebTeller {
     rpc TransactionReport (APIREQ) returns (APIRES);
     rpc CashTellerInquiry (APIREQ) returns (APIRES);
     rpc InquiryNomorRekening (APIREQ) returns (APIRES);
+    rpc UpdateCetak (APIREQ) returns (APIRES);
     
 }
