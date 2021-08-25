@@ -151,6 +151,20 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				params["amount"] = params["txAmount"]
 				params["rpTag"] = params["txAmount"]
 			}
+			if val.FeatureCode == "404" && core == "S" {
+				params = map[string]string{
+					"tellerID":        req.Params["tellerID"],
+					"tellerPass":      req.Params["tellerPass"],
+					"amount":          val.Amount,
+					"txType":          val.Txtype,
+					"srcAccount":      val.BillerProductCode,
+					"customerId":      val.CustomerReference,
+					"inqData":         val.InquiryData,
+					"referenceNumber": util.RandomNumber(12),
+					"termType":        "6010",
+					"termId":          "KWTELLER",
+				}
+			}
 			log.Infof("asasaaasas:", params)
 			if val.FeatureName != "MPN" {
 				inqDataObj.Visit(func(key []byte, v *fastjson.Value) {
@@ -161,13 +175,10 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					}
 				})
 			}
-			if val.FeatureCode == "404" && core == "S" {
-				params["srcAccount"] = val.BillerProductCode
-				params["termId"] = "KWTELLER"
-			}
 			log.Infof("[%s] param Kw: %v", params)
 
 			gateMsg = transport.SendToGate("gate.shared", "12", params)
+			params["billerProductCode"] = val.BillerProductCode
 		}
 
 		if gateMsg.ResponseCode == "00" {
