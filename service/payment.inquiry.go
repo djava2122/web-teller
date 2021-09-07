@@ -77,6 +77,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 				"rpTag":     gateMsg.Data["rpTag"],
 				"rpFee":     gateMsg.Data["rpFee"],
 			}
+			gateMsg.Data["txFee"] = gateMsg.Data["rpFeeStruk"]
 		case "01", "02", "03", "04": // PLN Prepaid, Telco Postpaid, PLN Postpaid, PLN Non Taglis
 			var amount float64 = 0
 			var err error

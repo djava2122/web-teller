@@ -34,7 +34,10 @@ func (h *WebTellerHandler) UpdateCetak(_ context.Context, req *wtproto.APIREQ, r
 
 	err := repo.Transaction.Update(trxData)
 	if err != nil {
-		log.Errorf("error save transaction: %v", err)
+		res.Response, _ = json.Marshal(newResponse("01", "Error While Update Table"))
+		log.Errorf("Error Update Transaction: %v", err)
+	} else {
+		res.Response, _ = json.Marshal(newResponse("00", "SUCCESS"))
 	}
 	return nil
 }

@@ -2,6 +2,7 @@ package repo
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 
 	"gitlab.pactindo.com/ebanking/common/log"
@@ -35,6 +36,13 @@ type MTransaction struct {
 	ResponseCode      string  `json:"responseCode"`
 	Receipt           string  `json:"receipt"`
 }
+
+type GetReceipt struct {
+	Id          int         `json:id`
+	Receipt     interface{} `json:receipt`
+	JumlahCetak int         `json:jumlah_cetak`
+}
+
 type UCetak struct {
 	Id    string `json:"id"`
 	Cetak int    `json:"cetak"`
@@ -137,6 +145,22 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 	}
 
 	return
+}
+func (_ transaction) GetTransactionReceipt(reffNumber string) (result *GetReceipt) {
+	sql := "select id, receipt, jumlah_cetak from t_transaction where reference_number = $1"
+
+	var o GetReceipt
+	var tampung string
+	err := pg.DB.QueryRow(sql, reffNumber).Scan(&o.Id, &tampung, &o.JumlahCetak)
+	json.Unmarshal([]byte(tampung), &o.Receipt)
+	log.Infof("Select receip: %v", o)
+	log.Infof("Select tampung: %v", tampung)
+
+	if err == nil {
+		return &o
+	}
+
+	return nil
 }
 
 var Transaction transaction

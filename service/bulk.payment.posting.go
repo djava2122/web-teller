@@ -175,9 +175,12 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					}
 				})
 			}
-			log.Infof("[%s] param Kw: %v", params)
+			log.Infof("param Kw:", params)
 
 			gateMsg = transport.SendToGate("gate.shared", "12", params)
+			if val.FeatureCode == "302" {
+				params["fee"] = params["rpFeeStruk"]
+			}
 			params["billerProductCode"] = val.BillerProductCode
 		}
 
@@ -188,6 +191,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				gateMsg.Data["customerReference"] = val.CustomerReference
 				gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 				gateMsg.Data["amount"] = val.Amount
+				gateMsg.Data["fee"] = val.Fee
 				gateMsg.Data["accountName"] = val.BillerId
 				gateMsg.Data["featureCode"] = val.FeatureCode
 				gateMsg.Data["featureName"] = val.FeatureName
@@ -200,13 +204,14 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				gateMsg.Data["txDate"] = time.Now().Format("20060102 15:04:05")
 				gateMsg.Data["customerReference"] = val.CustomerReference
 				gateMsg.Data["featureName"] = val.FeatureName
+				gateMsg.Data["fee"] = val.Fee
 				gateMsg.Data["featureCode"] = val.FeatureCode
 				gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 				gateMsg.Data["responseCode"] = gateMsg.ResponseCode
 				gateMsg.Data["txStatus"] = "SUCCESS"
 
 			}
-			dataReceipt, _ := json.Marshal(gateMsg.Data["receipt"])
+			dataReceipt, _ := json.Marshal(gateMsg.Data)
 			log.Infof("Data test Response:", dataReceipt)
 			newDataTrx = append(newDataTrx, gateMsg.Data)
 			//res.Response, _ = json.Marshal(successResp(gateMsg.Data))
@@ -229,8 +234,12 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			gateMsg.Data["featureCode"] = val.FeatureCode
 			gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 			gateMsg.Data["responseCode"] = gateMsg.ResponseCode
-			gateMsg.Data["txStatus"] = "FAILED"
-
+			gateMsg.Data["txStatus"] = gateMsg.Description
+			if gateMsg.ResponseCode == "19" {
+				gateMsg.Data["txStatus"] = "FAILED"
+			} else {
+				gateMsg.Data["txStatus"] = gateMsg.Description
+			}
 			newDataTrx = append(newDataTrx, gateMsg.Data)
 
 			//res.Response, _ = json.Marshal(newResponseWithData(gateMsg.ResponseCode, ParseRC(gateMsg.ResponseCode), gateMsg.Data))
