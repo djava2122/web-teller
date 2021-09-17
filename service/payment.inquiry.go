@@ -53,19 +53,46 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		}
 		fee = int(rFee.Fee.Charge)
 	}
-
-	gateMsg := transport.SendToGate("gate.shared", req.TxType, map[string]string{
-		"core": req.Params["core"],
+	log.Infof("[%s] request branch: %v", req.Headers["Request-ID"], req.Params["branchCode"])
+	var substring string
+	if req.Params["featureCode"] == "404" {
+		branch := req.Params["branchCode"]
+		substring = branch[3:9]
+	} else {
+		substring = req.Params["branchCode"]
+	}
+	numbBill := ""
+	txFee := ""
+	if req.Params["featureCode"] == "319" {
+		numbBill = req.Params["numbBill"]
+		txFee = req.Params["txFee"]
+	}
+	Params := map[string]string{
+		"core":       req.Params["core"],
+		"branchCode": substring,
 		// "tellerID":          req.Params["tellerID"],
 		// "tellerPass":        req.Params["tellerPass"],
 		"txType":            txType,
+		"numbBill":          numbBill,
+		"fee":               txFee,
 		"billerId":          billerCode,
 		"billerProductCode": billerProductCode,
 		"customerId":        customerReference,
 		"referenceNumber":   util.RandomNumber(12),
 		"termType":          "6010",
 		"termId":            "WTELLER",
-	})
+	}
+	typeTamp := txType
+	if req.Params["featureCode"] == "404" {
+		typeTamp = "25"
+	} else {
+		typeTamp = req.TxType
+	}
+	if req.Params["featureCode"] == "318" {
+		Params["norangka"] = req.Params["customerReference2"]
+	}
+	gateMsg := transport.SendToGate("gate.shared", typeTamp, Params)
+	log.Infof("LOG Get :", gateMsg)
 	if gateMsg.ResponseCode == "00" {
 
 		switch txType {

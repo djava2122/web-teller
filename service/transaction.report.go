@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
+	"strconv"
+
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/trycatch"
 	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 	"gitlab.pactindo.com/ebanking/web-teller/repo"
-	"strconv"
 )
 
 func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
@@ -60,6 +61,7 @@ func ConvertStructTransactionToResult(transaction []repo.MTransaction) []*repo.T
 		data.FeatureGroupName = val.FeatureGroupName
 		data.TransactionDate = FormattedTime(val.TransactionDate, "2006-01-02 15:04:05")
 		data.TransactionAmount = val.TransactionAmount
+		data.Fee = val.Fee
 		data.TransactionStatus = val.TransactionStatus
 		data.ReferenceNumber = val.ReferenceNumber
 		data.CustomerReference = val.CustomerReference
@@ -70,4 +72,3 @@ func ConvertStructTransactionToResult(transaction []repo.MTransaction) []*repo.T
 	}
 	return result
 }
-

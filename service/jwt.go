@@ -19,6 +19,8 @@ type Claims struct {
 	TellerID       string `json:"tellerID"`
 	TellerPass     string `json:"tellerPass"`
 	CoCode         string `json:"coCode"`
+	branchCode     string `json:"branchCode"`
+	branchName     string `json:"branchName"`
 	TillCoCode     string `json:"tillCoCode"`
 	CompanyCode    string `json:"companyCode"`
 	BeginBalance   string `json:"beginBalance"`

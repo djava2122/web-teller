@@ -129,6 +129,7 @@ func BuildDataTransaction(data map[string]string, params map[string]string, stat
 	trx.ProductCode = params["billerCode"]
 	trx.ProductName = params["billerCode"]
 	trx.BillerName = params["billerProductCode"]
+	trx.Fee, _ = strconv.ParseFloat(params["fee"], 64)
 	trx.CustomerReference = params["customerId"]
 	trx.TransactionDate = time.Now().Format("20060102 15:04:05")
 	trx.TransactionAmount, _ = strconv.ParseFloat(params["amount"], 64)

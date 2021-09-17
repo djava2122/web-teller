@@ -23,7 +23,7 @@ type MTransaction struct {
 	TransactionDate   string  `json:"transactionDate"`
 	CurrencyCode      string  `json:"currencyCode"`
 	TransactionAmount float64 `json:"transactionAmount"`
-	Fee               string  `json:"fee"`
+	Fee               float64 `json:"fee"`
 	CustomerReference string  `json:"customerReference"`
 	BillerName        string  `json:"billerName"`
 	MerchantType      string  `json:"merchanType"`
@@ -60,6 +60,7 @@ type TransactionReport struct {
 	FeatureGroupName  string  `json:"featureGroupName"`
 	TransactionDate   string  `json:"transactionDate"`
 	TransactionAmount float64 `json:"transactionAmount"`
+	Fee               float64 `json:"fee"`
 	TransactionStatus string  `json:"transactionStatus"`
 	ReferenceNumber   string  `json:"referenceNumber"`
 	CustomerReference string  `json:"customerReference"`
@@ -88,15 +89,15 @@ func (_ transaction) Update(trx UCetak) error {
 func (_ transaction) Save(trx MTransaction) error {
 	sql := `insert into t_transaction (
 				reference_number, feature_id, feature_code, feature_name, product_id, product_code, product_name,
-				biller_name, transaction_date, transaction_amount, merchant_type, currency_code, customer_reference, created, createdby, 
+				biller_name, transaction_date, transaction_amount, fee, merchant_type, currency_code, customer_reference, created, createdby, 
 				updated, updatedby, transaction_status, branch_code, response_code, feature_group_name, feature_group_code, receipt
 			) values (
-					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
 			)`
 
 	ar, err := pg.DB.Exec(sql,
 		trx.ReferenceNumber, trx.FeatureId, trx.FeatureCode, trx.FeatureName, trx.ProductId, trx.ProductCode,
-		trx.ProductName, trx.BillerName, trx.TransactionDate, trx.TransactionAmount, trx.MerchantType, trx.CurrencyCode,
+		trx.ProductName, trx.BillerName, trx.TransactionDate, trx.TransactionAmount, trx.Fee, trx.MerchantType, trx.CurrencyCode,
 		trx.CustomerReference, trx.Created, trx.CreatedBy, trx.Updated, trx.UpdatedBy, trx.TransactionStatus, trx.BranchCode,
 		trx.ResponseCode, trx.FeatureGroupName, trx.FeatureGroupCode, trx.Receipt)
 	log.Infof("[%s] Insert Table: %v", ar)
@@ -110,7 +111,7 @@ func (_ transaction) Save(trx MTransaction) error {
 }
 
 func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
-	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code from t_transaction ")
+	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code from t_transaction ")
 	if teller != "" {
 		query.WriteString(fmt.Sprintf(" WHERE createdby = '%s'", teller))
 	}
@@ -131,6 +132,7 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 			&datas.FeatureGroupName,
 			&datas.TransactionDate,
 			&datas.TransactionAmount,
+			&datas.Fee,
 			&datas.TransactionStatus,
 			&datas.ReferenceNumber,
 			&datas.CustomerReference,
