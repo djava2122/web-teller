@@ -45,7 +45,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 
 		var inqDataObj *fastjson.Object
 		ftBol := false
-		if val.FeatureCode == "404" || val.FeatureCode == "103" || val.FeatureCode == "315" || val.FeatureGroupCode == "002" {
+		if val.FeatureCode == "404" || val.FeatureCode == "103" || val.FeatureCode == "315" || val.FeatureGroupCode == "002" || val.FeatureCode == "301" || val.FeatureCode == "311" {
 			ftBol = false
 		} else {
 			ftBol = true
@@ -226,7 +226,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				gateMsg.Data["responseCode"] = gateMsg.ResponseCode
 				gateMsg.Data["txStatus"] = "SUCCESS"
 			} else {
-				if val.FeatureCode == "201" || val.FeatureCode == "203" {
+				if val.FeatureCode == "201" || val.FeatureCode == "203" || val.FeatureCode == "306" || val.FeatureCode == "311" {
 					gateMsg.Data["amount"] = val.Amount
 				}
 				if val.FeatureCode == "404" && params["srcAccount"] != "" {

@@ -84,6 +84,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	}
 	typeTamp := txType
 	if req.Params["featureCode"] == "404" {
+		Params["srcAccount"] = req.Params["srcAccount"]
 		typeTamp = "25"
 	} else {
 		typeTamp = req.TxType

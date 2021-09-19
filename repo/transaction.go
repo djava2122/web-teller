@@ -148,6 +148,39 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 
 	return
 }
+
+func (_ transaction) FilterReff(teller string) (result []GetReceipt, err error) {
+	query := bytes.NewBufferString("select id, receipt, jumlah_cetak, transaction_amount from t_transaction")
+	if teller != "" {
+		query.WriteString(fmt.Sprintf("where reference_number = '%s' or reference_number = '%s'", teller, teller))
+	}
+	query.WriteString(" ORDER BY created DESC")
+	log.Infof("Test request: ", query.String())
+
+	rows, err := pg.DB.Query(query.String())
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		datas := GetReceipt{}
+		// tampung := ""
+		err := rows.Scan(
+			&datas.Id,
+			&datas.Receipt,
+			&datas.JumlahCetak,
+		)
+		// json.Unmarshal([]byte(tampung), &datas.Receipt)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, datas)
+		log.Infof("Test Receipt: ", result)
+	}
+
+	return
+}
+
 func (_ transaction) GetTransactionReceipt(reffNumber string) (result *GetReceipt) {
 	sql := "select id, receipt, jumlah_cetak from t_transaction where reference_number = $1"
 

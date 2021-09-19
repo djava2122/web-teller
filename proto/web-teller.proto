@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package wtproto;
 
+option go_package = "./";
+
 message APIREQ {
     string txType               = 1;
     map<string, string> Headers = 2;
@@ -25,5 +27,6 @@ service WebTeller {
     rpc CashTellerInquiry (APIREQ) returns (APIRES);
     rpc InquiryNomorRekening (APIREQ) returns (APIRES);
     rpc UpdateCetak (APIREQ) returns (APIRES);
+    rpc ReInquiryMPN (APIREQ) returns (APIRES);
     
 }
