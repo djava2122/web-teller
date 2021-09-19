@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package wtproto;
 
-option go_package = "./";
-
 message APIREQ {
     string txType               = 1;
     map<string, string> Headers = 2;
