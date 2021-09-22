@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/transport"
@@ -67,6 +68,9 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		numbBill = req.Params["numbBill"]
 		txFee = req.Params["txFee"]
 	}
+	txDate := time.Now()
+	// date1 := txDate.Format("20060102")
+	// date2 := txDate.Format("20060102")
 	Params := map[string]string{
 		"core":       req.Params["core"],
 		"branchCode": substring,
@@ -79,6 +83,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		"billerProductCode": billerProductCode,
 		"customerId":        customerReference,
 		"referenceNumber":   util.RandomNumber(12),
+		"dateTime":          txDate.Format("20060102150405"),
 		"termType":          "6010",
 		"termId":            "WTELLER",
 	}
@@ -133,6 +138,15 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 
 		res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 	} else {
+		if gateMsg.ResponseCode == "89" {
+			gateMsg.Description = "Tidak Ada Tagihan"
+		} else if gateMsg.ResponseCode == "64" {
+			gateMsg.Description = "Tagihan Sudah Terbayar"
+		} else if gateMsg.ResponseCode == "19" {
+			gateMsg.Description = "Nomor Tidak Ditemukan"
+		} else if gateMsg.ResponseCode == "01" {
+			gateMsg.Description = "Tagihan Tidak Tersedia"
+		}
 		res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
 	}
 

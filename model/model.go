@@ -303,6 +303,7 @@ type BulkPayment struct {
 	CustomerReference  string `json:"customerReference"`
 	CustomerReference2 string `json:"customerReference2"`
 	FeatureName        string `json:"featureName"`
+	ProductName        string `json:"productName"`
 	FeatureId          string `json:"featureId"`
 	FeatureCode        string `json:"featureCode"`
 	FeatureGroupName   string `json:"featureGroupName"`
@@ -314,4 +315,5 @@ type BulkPayment struct {
 	RpFeeStruk         string `json:"rpFeeStruk"`
 	RpTag              string `json:"rpTag"`
 	TotalBill          string `json:"totalBill"`
+	TxDate             string `json:"txDate"`
 }

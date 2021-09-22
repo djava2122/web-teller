@@ -126,8 +126,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					val.PaymentOptions = string(jAdd)
 				}
 			}
-			log.Infof("additional :", val.PaymentOptions)
-
+			txDate := time.Now()
 			params = map[string]string{
 				"core":              req.Params["core"],
 				"tellerID":          req.Params["tellerID"],
@@ -151,7 +150,9 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				"totalBill":         val.TotalBill,
 				"termType":          "6010",
 				"termId":            "WTELLER",
+				"dateTime":          txDate.Format("20060102150405"),
 			}
+
 			if val.FeatureCode == "315" {
 				params["amount"] = params["txAmount"]
 				params["rpTag"] = params["txAmount"]
@@ -160,6 +161,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				params = map[string]string{
 					"tellerID":        req.Params["tellerID"],
 					"tellerPass":      req.Params["tellerPass"],
+					"core":            core,
 					"amount":          val.Amount,
 					"txType":          val.Txtype,
 					"srcAccount":      val.BillerProductCode,
@@ -167,7 +169,8 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					"inqData":         val.InquiryData,
 					"referenceNumber": util.RandomNumber(12),
 					"termType":        "6010",
-					"termId":          "KWTELLER",
+					"termId":          "SWTELLER",
+					"dateTime":        txDate.Format("20060102150405"),
 				}
 			}
 			if val.FeatureCode == "404" {
@@ -181,7 +184,6 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			} else if val.FeatureCode != "302" {
 				params["formatType"] = "506"
 			}
-			log.Infof("Request:", params)
 			if val.FeatureName != "MPN" {
 				inqDataObj.Visit(func(key []byte, v *fastjson.Value) {
 					if v.Type() == fastjson.TypeString {
@@ -194,7 +196,13 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			if val.FeatureCode == "318" {
 				params["norangka"] = val.CustomerReference2
 			}
-			log.Infof("param Send to Gate:", params)
+			if val.FeatureCode == "201" || val.FeatureCode == "203" || val.FeatureCode == "311" || val.FeatureCode == "301" || val.FeatureCode == "306" {
+				tag, _ := strconv.Atoi(val.Amount)
+				fee, _ := strconv.Atoi(val.Fee)
+				total := strconv.Itoa(tag + fee)
+				params["amount"] = total
+			}
+			log.Infof("Request-ID:[%s] param Send to Gate: %v", req.Headers["Request-ID"], params)
 			if val.FeatureCode == "404" {
 				gateMsg = transport.SendToGate("gate.shared", "26", params)
 			} else {
@@ -211,7 +219,20 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			}
 			params["billerProductCode"] = val.BillerProductCode
 		}
-
+		data := map[string]string{
+			"featureCode":       val.FeatureCode,
+			"txDate":            params["dateTime"],
+			"featureName":       val.FeatureName,
+			"amount":            val.Amount,
+			"txType":            val.Txtype,
+			"srcAccount":        val.BillerProductCode,
+			"customerReference": val.CustomerReference,
+			"inqData":           val.InquiryData,
+			"txRefNumber":       params["referenceNumber"],
+			"termType":          "6010",
+			"termId":            "KWTELLER",
+		}
+		log.Infof("['%s'] Response Gate: %v", req.Headers["Request-ID"], gateMsg)
 		if gateMsg.ResponseCode == "00" {
 			if val.FeatureCode == "103" {
 				gateMsg.Data = make(map[string]interface{})
@@ -226,13 +247,14 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				gateMsg.Data["responseCode"] = gateMsg.ResponseCode
 				gateMsg.Data["txStatus"] = "SUCCESS"
 			} else {
-				if val.FeatureCode == "201" || val.FeatureCode == "203" || val.FeatureCode == "306" || val.FeatureCode == "311" {
+				if val.FeatureCode == "201" || val.FeatureCode == "203" || val.FeatureCode == "306" || val.FeatureCode == "311" || val.FeatureCode == "301" {
 					gateMsg.Data["amount"] = val.Amount
+					gateMsg.Data["productName"] = val.ProductName
 				}
 				if val.FeatureCode == "404" && params["srcAccount"] != "" {
 					gateMsg.Data["srcAccount"] = val.BillerProductCode
 				}
-				gateMsg.Data["txDate"] = time.Now().Format("20060102 15:04:05")
+				gateMsg.Data["txDate"] = params["dateTime"]
 				gateMsg.Data["customerReference"] = val.CustomerReference
 				gateMsg.Data["featureName"] = val.FeatureName
 				gateMsg.Data["fee"] = params["fee"]
@@ -254,9 +276,9 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			params["productCode"] = val.BillerCode
 			params["featureId"] = val.FeatureId
 			params["branchCode"] = req.Params["branchCode"]
+
 			params["receipt"] = string(dataReceipt)
 			params["txStatus"] = "SUCCESS"
-
 		} else {
 			gateMsg.Data = make(map[string]interface{})
 			gateMsg.Data["txDate"] = FormattedTime(req.Params["txDate"], "20060102 15:04:05")
@@ -273,6 +295,8 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			}
 			newDataTrx = append(newDataTrx, gateMsg.Data)
 
+			data["txStatus"] = gateMsg.Description
+			receiptParam, _ := json.Marshal(data)
 			//res.Response, _ = json.Marshal(newResponseWithData(gateMsg.ResponseCode, ParseRC(gateMsg.ResponseCode), gateMsg.Data))
 			params["featureGroupCode"] = val.FeatureGroupCode
 			params["featureGroupName"] = val.FeatureGroupName
@@ -282,8 +306,8 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			params["productCode"] = val.BillerCode
 			params["featureId"] = val.FeatureId
 			params["branchCode"] = req.Params["branchCode"]
-			params["txStatus"] = "FAILED"
-
+			params["txStatus"] = gateMsg.Description
+			params["receipt"] = string(receiptParam)
 		}
 		trxData := BuildDataTransaction(req.Params, params, params["txStatus"], gateMsg.ResponseCode)
 

@@ -149,14 +149,14 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 	return
 }
 
-func (_ transaction) FilterReff(teller string) (result []GetReceipt, err error) {
-	query := bytes.NewBufferString("select id, receipt, jumlah_cetak, transaction_amount from t_transaction")
+func (_ transaction) GetTrxCustom(teller string) (result []GetReceipt, err error) {
+	query := bytes.NewBufferString("select id, receipt, jumlah_cetak from t_transaction")
 	if teller != "" {
-		query.WriteString(fmt.Sprintf("where reference_number = '%s' or reference_number = '%s'", teller, teller))
+		query.WriteString(fmt.Sprintf(" WHERE reference_number = '%s' or customer_reference = '%s'", teller, teller))
 	}
-	query.WriteString(" ORDER BY created DESC")
-	log.Infof("Test request: ", query.String())
 
+	query.WriteString(" ORDER BY created DESC")
+	log.Infof("Query :", query.String())
 	rows, err := pg.DB.Query(query.String())
 	if err != nil {
 		return nil, err
@@ -164,18 +164,17 @@ func (_ transaction) FilterReff(teller string) (result []GetReceipt, err error) 
 
 	for rows.Next() {
 		datas := GetReceipt{}
-		// tampung := ""
+		var tampung string
 		err := rows.Scan(
 			&datas.Id,
-			&datas.Receipt,
+			&tampung,
 			&datas.JumlahCetak,
 		)
-		// json.Unmarshal([]byte(tampung), &datas.Receipt)
+		json.Unmarshal([]byte(tampung), &datas.Receipt)
 		if err != nil {
 			return nil, err
 		}
 		result = append(result, datas)
-		log.Infof("Test Receipt: ", result)
 	}
 
 	return
