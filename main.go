@@ -2,11 +2,12 @@ package main
 
 import (
 	"strconv"
+	"time"
 
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/micro"
-	"gitlab.pactindo.com/ebanking/common/redis"
 	"gitlab.pactindo.com/ebanking/common/pg"
+	"gitlab.pactindo.com/ebanking/common/redis"
 
 	"gitlab.pactindo.com/ebanking/web-teller/service"
 
@@ -22,6 +23,7 @@ func main() {
 			"REDIS_URL",
 			"REDIS_POOLSIZE",
 		),
+		micro.RequestTimeout(time.Second*58),
 	)
 
 	log.InfoS("starting service: " + micro.GetServiceName())
