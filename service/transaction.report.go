@@ -41,7 +41,7 @@ func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.A
 	if err != nil {
 		log.Errorf("error get data transaction: %v", err)
 	}
-
+	log.Infof("Request-ID:[%s] Isi Data: %v", req.Headers["Request-ID"], datas)
 	if len(datas) != 0 {
 		res.Response, _ = json.Marshal(successResp(ConvertStructTransactionToResult(datas)))
 	} else {

@@ -45,7 +45,7 @@ spec:
       volumes:
         - name: tz-config
           hostPath:
-            path: /usr/share/zoneinfo/Asia/Jakarta
+            path: /usr/share/zoneinfo/Asia/Manila
 
 ---
 

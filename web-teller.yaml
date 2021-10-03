@@ -4,7 +4,7 @@ metadata:
   namespace: ebanking
   name: web-teller-config
 data:
-  DB_URL: "host=172.19.252.114 user=ebanking password=ebanking dbname=web-teller-api-gw sslmode=disable"
+  DB_URL: "host=172.19.252.114 user=ebanking password=ebanking dbname=web-teller sslmode=disable"
   REDIS_URL: "redis://172.19.252.114:6379/0"
   REDIS_POOLSIZE: ""
 
@@ -57,7 +57,7 @@ spec:
             type: DirectoryOrCreate
         - name: tz-config
           hostPath:
-            path: /usr/share/zoneinfo/Asia/Jakarta
+            path: /usr/share/zoneinfo/Asia/Manila
 
 ---
 

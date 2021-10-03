@@ -86,6 +86,21 @@ func (_ transaction) Update(trx UCetak) error {
 
 	return nil
 }
+func (_ transaction) UpdateMpn(resp, sts, receipt, reff string) error {
+	sql := `UPDATE t_transaction
+	SET response_code = $1, transaction_status = $2,receipt = $3
+	WHERE reference_number = $4;`
+
+	ar, err := pg.DB.Exec(sql, resp, sts, receipt, reff)
+	log.Infof("[%s] Update Table: %v", ar)
+
+	if err != nil {
+		log.Errorf("OI OI ERROR :", err)
+		return err
+	}
+
+	return nil
+}
 func (_ transaction) Save(trx MTransaction) error {
 	sql := `insert into t_transaction (
 				reference_number, feature_id, feature_code, feature_name, product_id, product_code, product_name,
@@ -145,14 +160,14 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 		}
 		result = append(result, datas)
 	}
-
+	log.Infof("Result Report : %s", result)
 	return
 }
 
 func (_ transaction) GetTrxCustom(teller string) (result []GetReceipt, err error) {
 	query := bytes.NewBufferString("select id, receipt, jumlah_cetak from t_transaction")
 	if teller != "" {
-		query.WriteString(fmt.Sprintf(" WHERE reference_number = '%s' or customer_reference = '%s'", teller, teller))
+		query.WriteString(fmt.Sprintf(" WHERE (reference_number = '%s' or customer_reference = '%s') and (response_code = '00' or response_code = '06')", teller, teller))
 	}
 
 	query.WriteString(" ORDER BY created DESC")
@@ -161,7 +176,7 @@ func (_ transaction) GetTrxCustom(teller string) (result []GetReceipt, err error
 	if err != nil {
 		return nil, err
 	}
-
+	log.Infof("Test query:", rows)
 	for rows.Next() {
 		datas := GetReceipt{}
 		var tampung string

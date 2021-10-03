@@ -89,7 +89,11 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	}
 	typeTamp := txType
 	if req.Params["featureCode"] == "404" {
-		Params["srcAccount"] = req.Params["srcAccount"]
+		if req.Params["srcAccount"] == "" {
+			Params["srcAccount"] = "1000000000"
+		} else {
+			Params["srcAccount"] = req.Params["srcAccount"]
+		}
 		typeTamp = "25"
 	} else {
 		typeTamp = req.TxType
@@ -146,6 +150,18 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 			gateMsg.Description = "Nomor Tidak Ditemukan"
 		} else if gateMsg.ResponseCode == "01" {
 			gateMsg.Description = "Tagihan Tidak Tersedia"
+		} else if gateMsg.ResponseCode == "02" {
+			gateMsg.Description = "Tagihan Kadaluarsa"
+		} else if gateMsg.ResponseCode == "32" {
+			gateMsg.Description = "Kode Mata Uang Tidak Ditemukan"
+		} else if gateMsg.ResponseCode == "04" {
+			gateMsg.Description = "Nomor Rekening Persepsi Tidak Ditemukan"
+		} else if gateMsg.ResponseCode == "27" {
+			gateMsg.Description = "Tagihan Sudah Terbayar di CA lain"
+		} else if gateMsg.ResponseCode == "31" {
+			gateMsg.Description = "Kode Bank Tidak Ditemukan"
+		} else if gateMsg.ResponseCode == "45" {
+			gateMsg.Description = "Tagihan Sedang Dalam Proses"
 		}
 		res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
 	}
