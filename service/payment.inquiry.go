@@ -42,6 +42,8 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	switch txType {
 	case "LB":
 		// do nothing
+	case "07":
+
 	default:
 		var reqGetFee = pfee.ReqFee{FeatureCode: req.Params["featureCode"], RequestId: req.Headers["Request-ID"]}
 		rFee, err := feeSvc.GetFeatureFee(ctx, &reqGetFee)
