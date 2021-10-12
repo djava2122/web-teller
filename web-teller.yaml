@@ -7,7 +7,7 @@ data:
   DB_URL: "host=172.19.252.114 user=ebanking password=ebanking dbname=web-teller sslmode=disable"
   REDIS_URL: "redis://172.19.252.114:6379/0"
   REDIS_POOLSIZE: ""
-
+  GATEWAY_TIMEOUT: "90"
 ---
 
 apiVersion: apps/v1

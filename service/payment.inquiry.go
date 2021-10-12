@@ -89,19 +89,22 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		"termType":          "6010",
 		"termId":            "WTELLER",
 	}
+	if req.Params["srcAccount"] == "" {
+		Params["srcAccount"] = "1000000000"
+	} else {
+		Params["srcAccount"] = req.Params["srcAccount"]
+	}
 	typeTamp := txType
 	if req.Params["featureCode"] == "404" {
-		if req.Params["srcAccount"] == "" {
-			Params["srcAccount"] = "1000000000"
-		} else {
-			Params["srcAccount"] = req.Params["srcAccount"]
-		}
 		typeTamp = "25"
 	} else {
 		typeTamp = req.TxType
 	}
 	if req.Params["featureCode"] == "318" {
 		Params["norangka"] = req.Params["customerReference2"]
+	}
+	if req.Params["featureCode"] == "319" || req.Params["featureCode"] == "303" {
+		Params["srcAccType"] = "00"
 	}
 	gateMsg := transport.SendToGate("gate.shared", typeTamp, Params)
 	log.Infof("LOG Get :", gateMsg)
@@ -141,7 +144,6 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		default:
 			gateMsg.Data["txFee"] = strconv.Itoa(fee)
 		}
-
 		res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 	} else {
 		if gateMsg.ResponseCode == "89" {

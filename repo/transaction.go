@@ -164,12 +164,14 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 	return
 }
 
-func (_ transaction) GetTrxCustom(teller string) (result []GetReceipt, err error) {
+func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceipt, err error) {
 	query := bytes.NewBufferString("select id, receipt, jumlah_cetak from t_transaction")
 	if teller != "" {
 		query.WriteString(fmt.Sprintf(" WHERE (reference_number = '%s' or customer_reference = '%s') and (response_code = '00' or response_code = '06')", teller, teller))
 	}
-
+	if start != "All" {
+		query.WriteString(fmt.Sprintf(" and  transaction_date between '%s' and '%s'", start, end))
+	}
 	query.WriteString(" ORDER BY created DESC")
 	log.Infof("Query :", query.String())
 	rows, err := pg.DB.Query(query.String())

@@ -16,51 +16,51 @@ import (
 )
 
 type GetMgateStruct struct {
-	TxRefNumber       string `json:txRefNumber`
-	ResponseCode      string `json:responseCode`
-	TxDate            string `json:txDate`
-	BookDate          string `json:bookDate`
-	Ntb               string `json:ntb`
-	Ntpn              string `json:ntpn`
-	Stan              string `json:stan`
-	CustomerReference string `json:customerReference`
-	Npwp              string `json:npwp`
-	PrayerName        string `json:prayerName`
-	PrayerAddress     string `json:prayerAddress`
-	Nop               string `json:nop`
-	TaxAccount        string `json:taxAccount`
-	DepositTypeCode   string `json:depositTypeCode`
-	TaxPeriod         string `json:taxPeriod`
-	SkNumber          string `json:skNumber`
-	Amount            string `json:amount`
-	CurrencyCode      string `json:currencyCode`
-	PrayerId          string `json:prayerId`
-	DocumentType      string `json:documentType`
-	DocumentNumber    string `json:documentNumber`
-	DocumentDate      string `json:documentDate`
-	KppbcCode         string `json:kppbcCode`
-	Kl                string `json:kl`
-	UnitEselon        string `json:unitEselon`
-	SatkerCode        string `json:satkerCode`
-	FeatureCode       string `json:featureCode`
-	FeatureName       string `json:featurName`
+	TxRefNumber       string         `json:txRefNumber`
+	ResponseCode      string         `json:responseCode`
+	TxDate            string         `json:txDate`
+	BookDate          sql.NullString `json:bookDate`
+	Ntb               sql.NullString `json:ntb`
+	Ntpn              sql.NullString `json:ntpn`
+	Stan              sql.NullString `json:stan`
+	CustomerReference sql.NullString `json:customerReference`
+	Npwp              sql.NullString `json:npwp`
+	PrayerName        sql.NullString `json:prayerName`
+	PrayerAddress     sql.NullString `json:prayerAddress`
+	Nop               sql.NullString `json:nop`
+	TaxAccount        sql.NullString `json:taxAccount`
+	DepositTypeCode   sql.NullString `json:depositTypeCode`
+	TaxPeriod         sql.NullString `json:taxPeriod`
+	SkNumber          sql.NullString `json:skNumber`
+	Amount            sql.NullString `json:amount`
+	CurrencyCode      sql.NullString `json:currencyCode`
+	PrayerId          sql.NullString `json:prayerId`
+	DocumentType      sql.NullString `json:documentType`
+	DocumentNumber    sql.NullString `json:documentNumber`
+	DocumentDate      sql.NullString `json:documentDate`
+	KppbcCode         sql.NullString `json:kppbcCode`
+	Kl                sql.NullString `json:kl`
+	UnitEselon        sql.NullString `json:unitEselon`
+	SatkerCode        sql.NullString `json:satkerCode`
+	FeatureCode       string         `json:featureCode`
+	FeatureName       string         `json:featurName`
 }
 
 type ReqMPN struct {
 	TxRefNumber     string            `json:txRefNumber`
 	ResponseCode    string            `json:responseCode`
-	Datetime        string            `json:dateTime`
-	TermType        string            `json:termType`
-	TermId          string            `json:termId`
-	CustomerId      string            `json:customerId`
-	SrcAccount      string            `json:srcAccount`
-	Amount          string            `json:amount`
-	InqData         string            `json:inqData`
-	ReferenceNumber string            `json:referenceNumber`
+	Datetime        sql.NullString    `json:dateTime`
+	TermType        sql.NullString    `json:termType`
+	TermId          sql.NullString    `json:termId`
+	CustomerId      sql.NullString    `json:customerId`
+	SrcAccount      sql.NullString    `json:srcAccount`
+	Amount          sql.NullString    `json:amount`
+	InqData         sql.NullString    `json:inqData`
+	ReferenceNumber sql.NullString    `json:referenceNumber`
 	Additional      map[string]string `json:additional`
 }
 
-func InitDb(req string) (result []interface{}, err error) {
+func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 	dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -73,13 +73,14 @@ func InitDb(req string) (result []interface{}, err error) {
 	sql := ""
 	jenis, _ := strconv.Atoi(req[0:1])
 	if jenis <= 3 {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'ntpn' as ntpn, fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'npwp' as npwp, fields -> 'payerName'as payerName, fields -> 'payerAddress' as payerAddress, fields->'taxAccount' as taxAccount, fields -> 'depositTypeCode'as depositTypeCode,fields -> 'taxPeriod' as taxPeriod, fields -> 'skNumber' as skNumber,fields -> 'amount' as amount, fields -> 'currencyCode' as currencyCode, fields -> 'nop' as nop from mgate.t_transaction where trrfnm = $1 or fields -> 'customerId' = $2 and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '45') and mclass <> 'R'"
+		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'npwp' as npwp, fields -> 'payerName'as payerName, fields -> 'payerAddress' as payerAddress, fields->'taxAccount' as taxAccount, fields -> 'depositTypeCode'as depositTypeCode,fields -> 'taxPeriod' as taxPeriod, fields -> 'skNumber' as skNumber,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'ntpn' as ntpn, fields -> 'nop' as nop from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06')"
 	} else if jenis >= 7 {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'ntpn' as ntpn, fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName,fields -> 'amount'as amount, fields -> 'currencyCode' as currencyCode, fields -> 'kl' as kl, fields -> 'unitEselon' as unitEselon, fields -> 'satkerCode' as satkerCode from mgate.t_transaction where trrfnm = $1 or fields -> 'customerId' = $2 and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '45') and mclass <> 'R'"
+		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'kl' as kl, fields -> 'unitEselon' as unitEselon, fields -> 'satkerCode' as satkerCode,  fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4)  and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06')"
 	} else {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'ntpn' as ntpn, fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName, fields -> 'amount'as amount, fields -> 'currencyCode' as currencyCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode from mgate.t_transaction where trrfnm = $1 or fields -> 'customerId' = $2 and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '45') and mclass <> 'R'"
+		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName, cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode, fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06')"
 	}
-	rows, _ := db.Query(sql, req, req)
+	log.Infof("query : ", sql)
+	rows, _ := db.Query(sql, startDate, endDate, req, req)
 	// if err != nil {
 	// 	return nil, err
 	// }
@@ -93,7 +94,6 @@ func InitDb(req string) (result []interface{}, err error) {
 				&dt.TxDate,
 				&dt.BookDate,
 				&dt.Ntb,
-				&dt.Ntpn,
 				&dt.Stan,
 				&dt.CustomerReference,
 				&dt.Npwp,
@@ -105,6 +105,7 @@ func InitDb(req string) (result []interface{}, err error) {
 				&dt.SkNumber,
 				&dt.Amount,
 				&dt.CurrencyCode,
+				&dt.Ntpn,
 				&dt.Nop,
 			)
 		} else if jenis >= 7 {
@@ -114,7 +115,6 @@ func InitDb(req string) (result []interface{}, err error) {
 				&dt.TxDate,
 				&dt.BookDate,
 				&dt.Ntb,
-				&dt.Ntpn,
 				&dt.Stan,
 				&dt.CustomerReference,
 				&dt.PrayerName,
@@ -123,6 +123,7 @@ func InitDb(req string) (result []interface{}, err error) {
 				&dt.Kl,
 				&dt.UnitEselon,
 				&dt.SatkerCode,
+				&dt.Ntpn,
 			)
 		} else {
 			err = rows.Scan(
@@ -131,7 +132,6 @@ func InitDb(req string) (result []interface{}, err error) {
 				&dt.TxDate,
 				&dt.BookDate,
 				&dt.Ntb,
-				&dt.Ntpn,
 				&dt.Stan,
 				&dt.CustomerReference,
 				&dt.PrayerName,
@@ -141,6 +141,7 @@ func InitDb(req string) (result []interface{}, err error) {
 				&dt.DocumentNumber,
 				&dt.DocumentDate,
 				&dt.KppbcCode,
+				&dt.Ntpn,
 			)
 		}
 		dt.FeatureCode = "404"
@@ -152,8 +153,8 @@ func InitDb(req string) (result []interface{}, err error) {
 		} else if dt.ResponseCode == "99" || dt.ResponseCode == "19" {
 			status = "FAILED"
 		} else {
-			sql = "select trrfnm, trrspc, fields -> 'dateTime' as dateTime, fields -> 'inqData' as inqData, fields -> 'termID' as termID, fields -> 'termType' as termType, fields -> 'amount' as amount, fields -> 'additional' as additional, fields -> 'srcAccount' as srcAccount from mgate.t_transaction where trrfnm = $1 or fields -> 'customerId' = $2 and trftcd = 'MPN2' and 	(trrspc = '06' or trrspc = '45')"
-			rows, _ = db.Query(sql, req, req)
+			sql = "select trrfnm, trrspc, fields -> 'dateTime' as dateTime, fields -> 'inqData' as inqData, fields -> 'termID' as termID, fields -> 'termType' as termType, cast(isomsg -> '4' as integer)/100 as amount, fields -> 'additional' as additional, fields -> 'srcAccount' as srcAccount from mgate.t_transaction where (rtdate between $1 and $2 ) and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and trrspc = '06'"
+			rows, _ = db.Query(sql, startDate, endDate, req, req)
 			for rows.Next() {
 				Rdt := ReqMPN{}
 				var tamp string
@@ -170,50 +171,89 @@ func InitDb(req string) (result []interface{}, err error) {
 				)
 				dt.Amount = Rdt.Amount
 				dt.TxRefNumber = Rdt.TxRefNumber
-				dt.TxDate = Rdt.Datetime
+				dt.TxDate = Rdt.Datetime.String
 				status = "PENDING"
 				json.Unmarshal([]byte(tamp), &Rdt.Additional)
 				reqParams := map[string]string{
 					"txType":             "07",
 					"dateTime":           time.Now().Format("20060102150405"),
-					"termType":           Rdt.TermType,
-					"termId":             Rdt.TermId,
+					"termType":           Rdt.TermType.String,
+					"termId":             Rdt.TermId.String,
 					"customerId":         req,
-					"srcAccount":         Rdt.SrcAccount,
-					"amount":             Rdt.Amount,
+					"srcAccount":         Rdt.SrcAccount.String,
+					"amount":             Rdt.Amount.String,
 					"description":        "",
-					"inqData":            Rdt.InqData,
+					"inqData":            Rdt.InqData.String,
 					"referenceNumber":    util.RandomNumber(12),
-					"orgDateTime":        Rdt.Datetime,
+					"orgDateTime":        Rdt.Datetime.String,
 					"orgReferenceNumber": Rdt.TxRefNumber,
 				}
 				log.Infof("ddd ", reqParams)
 				gateMsg := transport.SendToGate("gate.shared", "27", reqParams)
+				log.Infof("Gate send response:  ", gateMsg)
+
 				if gateMsg.ResponseCode == "00" {
 					status = "SUCCESS"
+				} else if gateMsg.ResponseCode == "AW" {
+					dt.ResponseCode = Rdt.ResponseCode
+					status = "Reinquiry Gagal"
 				} else if gateMsg.ResponseCode == "99" || dt.ResponseCode == "19" {
 					status = "FAILED"
 				} else {
 					status = "PENDING"
 				}
-				log.Infof("termId :", gateMsg.Data["ntpn"])
 				log.Infof("Reinquiry Mgate rc timeout :", gateMsg)
-				resp["Receipt"] = gateMsg.Data
-				gateMsg.Data["featureCode"] = dt.FeatureCode
-				gateMsg.Data["featureName"] = dt.FeatureName
-				gateMsg.Data["txRefNumber"] = dt.TxRefNumber
-				gateMsg.Data["txDate"] = reqParams["orgDateTime"]
-				gateMsg.Data["customerReference"] = reqParams["customerId"]
-				gateMsg.Data["txStatus"] = status
-				receipt, _ := json.Marshal(gateMsg.Data)
-				sqlMgate := `update mgate.t_transaction set trrspc = $1 where trrfnm = $2;`
-				_, err := db.Exec(sqlMgate, "00", dt.TxRefNumber)
-				db.Close()
-				if Rdt.TermId == "WTELLER" || Rdt.TermId == "KWTELLER" {
-					updateTabel := repo.Transaction.UpdateMpn(gateMsg.ResponseCode, status, string(receipt), dt.TxRefNumber)
-					log.Infof("update table teller :", updateTabel)
+				if gateMsg.ResponseCode == "00" {
+					resp["Receipt"] = gateMsg.Data
+					gateMsg.Data["featureCode"] = dt.FeatureCode
+					gateMsg.Data["featureName"] = dt.FeatureName
+					gateMsg.Data["txRefNumber"] = dt.TxRefNumber
+					gateMsg.Data["txDate"] = reqParams["orgDateTime"]
+					gateMsg.Data["customerReference"] = reqParams["customerId"]
+					gateMsg.Data["txStatus"] = status
+					receipt, _ := json.Marshal(gateMsg.Data)
+					// sqlMgate := `update mgate.t_transaction set trrspc = $1 where trrfnm = $2;`
+					// db.Exec(sqlMgate, "00", dt.TxRefNumber)
+					// db.Close()
+					if Rdt.TermId.String == "WTELLER" || Rdt.TermId.String == "KWTELLER" {
+						updateTabel := repo.Transaction.UpdateMpn(gateMsg.ResponseCode, status, string(receipt), dt.TxRefNumber)
+						log.Infof("update table teller :", updateTabel)
+					}
+				} else {
+					resp["Receipt"] = map[string]string{
+						"txRefNumber":       dt.TxRefNumber,
+						"responseCode":      dt.ResponseCode,
+						"txDate":            dt.TxDate,
+						"bookDate":          dt.BookDate.String,
+						"ntb":               dt.Ntb.String,
+						"ntpn":              dt.Ntpn.String,
+						"stan":              dt.Stan.String,
+						"customerReference": dt.CustomerReference.String,
+						"npwp":              dt.Npwp.String,
+						"payerName":         dt.PrayerName.String,
+						"payerAddress":      dt.PrayerAddress.String,
+						"nop":               dt.Nop.String,
+						"taxAccount":        dt.TaxAccount.String,
+						"depositTypeCode":   dt.DepositTypeCode.String,
+						"taxPeriod":         dt.TaxPeriod.String,
+						"skNumber":          dt.SkNumber.String,
+						"amount":            dt.Amount.String,
+						"currencyCode":      dt.CurrencyCode.String,
+						"payerId":           dt.PrayerId.String,
+						"documentType":      dt.DocumentType.String,
+						"documentNumber":    dt.DocumentNumber.String,
+						"documentDate":      dt.DocumentDate.String,
+						"kppbcCode":         dt.KppbcCode.String,
+						"kl":                dt.Kl.String,
+						"unitEselon":        dt.UnitEselon.String,
+						"satkerCode":        dt.SatkerCode.String,
+						"featureCode":       dt.FeatureCode,
+						"featureName":       dt.FeatureName,
+						"txStatus":          status,
+					}
 				}
 				result = append(result, resp)
+				log.Infof("result : ", result...)
 				return result, err
 			}
 
@@ -232,29 +272,29 @@ func InitDb(req string) (result []interface{}, err error) {
 			"txRefNumber":       dt.TxRefNumber,
 			"responseCode":      dt.ResponseCode,
 			"txDate":            dt.TxDate,
-			"bookDate":          dt.BookDate,
-			"ntb":               dt.Ntb,
-			"ntpn":              dt.Ntpn,
-			"stan":              dt.Stan,
-			"customerReference": dt.CustomerReference,
-			"npwp":              dt.Npwp,
-			"payerName":         dt.PrayerName,
-			"payerAddress":      dt.PrayerAddress,
-			"nop":               dt.Nop,
-			"taxAccount":        dt.TaxAccount,
-			"depositTypeCode":   dt.DepositTypeCode,
-			"taxPeriod":         dt.TaxPeriod,
-			"skNumber":          dt.SkNumber,
-			"amount":            dt.Amount,
-			"currencyCode":      dt.CurrencyCode,
-			"payerId":           dt.PrayerId,
-			"documentType":      dt.DocumentType,
-			"documentNumber":    dt.DocumentNumber,
-			"documentDate":      dt.DocumentDate,
-			"kppbcCode":         dt.KppbcCode,
-			"kl":                dt.Kl,
-			"unitEselon":        dt.UnitEselon,
-			"satkerCode":        dt.SatkerCode,
+			"bookDate":          dt.BookDate.String,
+			"ntb":               dt.Ntb.String,
+			"ntpn":              dt.Ntpn.String,
+			"stan":              dt.Stan.String,
+			"customerReference": dt.CustomerReference.String,
+			"npwp":              dt.Npwp.String,
+			"payerName":         dt.PrayerName.String,
+			"payerAddress":      dt.PrayerAddress.String,
+			"nop":               dt.Nop.String,
+			"taxAccount":        dt.TaxAccount.String,
+			"depositTypeCode":   dt.DepositTypeCode.String,
+			"taxPeriod":         dt.TaxPeriod.String,
+			"skNumber":          dt.SkNumber.String,
+			"amount":            dt.Amount.String,
+			"currencyCode":      dt.CurrencyCode.String,
+			"payerId":           dt.PrayerId.String,
+			"documentType":      dt.DocumentType.String,
+			"documentNumber":    dt.DocumentNumber.String,
+			"documentDate":      dt.DocumentDate.String,
+			"kppbcCode":         dt.KppbcCode.String,
+			"kl":                dt.Kl.String,
+			"unitEselon":        dt.UnitEselon.String,
+			"satkerCode":        dt.SatkerCode.String,
 			"featureCode":       dt.FeatureCode,
 			"featureName":       dt.FeatureName,
 			"txStatus":          status,
@@ -288,16 +328,27 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 	})
 	referenceNumber := req.Params["referenceNumber"]
 	feature := req.Params["feature"]
+	startDate := req.Params["startDate"]
+	endDate := req.Params["endDate"]
+
+	if startDate == "All" {
+		startDate = time.Now().Format("2006-01-02")
+	}
+	if endDate == "All" {
+		endDate = time.Now().Format("2006-01-02")
+	}
 	log.Infof("[%s] request: %s", req.Headers["Request-ID"], feature)
 	log.Infof("[%s] request: %s", req.Headers["Request-ID"], referenceNumber)
+	log.Infof("[%s] request: %s", req.Headers["Request-ID"], startDate)
+	log.Infof("[%s] request: %s", req.Headers["Request-ID"], endDate)
 
 	// jsonReq, _ := json.Marshal(req)
 	// log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
 	if feature == "404" {
-		resp, _ := InitDb(referenceNumber)
+		resp, _ := InitDb(referenceNumber, startDate, endDate)
 		res.Response, _ = json.Marshal(successResp(resp))
 	} else if feature == "receipt" {
-		receipt, _ := repo.Transaction.GetTrxCustom(referenceNumber)
+		receipt, _ := repo.Transaction.GetTrxCustom(referenceNumber, req.Params["startDate"], endDate)
 		log.Infof("[%s] request: %s", req.Headers["Request-ID"], receipt)
 		if receipt != nil {
 			res.Response, _ = json.Marshal(successResp(receipt))
