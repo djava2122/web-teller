@@ -38,9 +38,9 @@ type MTransaction struct {
 }
 
 type GetReceipt struct {
-	Id          int         `json:id`
-	Receipt     interface{} `json:receipt`
-	JumlahCetak int         `json:jumlah_cetak`
+	Id          int                    `json:id`
+	Receipt     map[string]interface{} `json:receipt`
+	JumlahCetak int                    `json:jumlah_cetak`
 }
 
 type UCetak struct {
@@ -197,13 +197,13 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 	return
 }
 
-func (_ transaction) GetTransactionReceipt(reffNumber string) (result *GetReceipt) {
-	sql := "select id, receipt, jumlah_cetak from t_transaction where reference_number = $1"
+func (_ transaction) GetTransactionReceipt(reffNumber string) (result interface{}) {
+	sql := "receipt from t_transaction where reference_number = $1"
 
-	var o GetReceipt
+	var o interface{}
 	var tampung string
-	err := pg.DB.QueryRow(sql, reffNumber).Scan(&o.Id, &tampung, &o.JumlahCetak)
-	json.Unmarshal([]byte(tampung), &o.Receipt)
+	err := pg.DB.QueryRow(sql, reffNumber).Scan(&tampung)
+	json.Unmarshal([]byte(tampung), &o)
 	log.Infof("Select receip: %v", o)
 	log.Infof("Select tampung: %v", tampung)
 

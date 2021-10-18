@@ -19,10 +19,16 @@ func newResponseWithData(code string, message string, data interface{}) response
 	return response2{
 		Code:    code,
 		Message: message,
-		Data: data,
+		Data:    data,
 	}
 }
-
+func respCekStatus(data interface{}, code, message string) response2 {
+	return response2{
+		Code:    code,
+		Message: message,
+		Data:    data,
+	}
+}
 func successResp(data interface{}) response2 {
 	return response2{
 		Code:    "00",

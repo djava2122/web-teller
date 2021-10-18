@@ -89,14 +89,18 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		"termType":          "6010",
 		"termId":            "WTELLER",
 	}
-	if req.Params["srcAccount"] == "" {
+	if req.Params["srcAccount"] == "" && req.Params["core"] == "K" {
 		Params["srcAccount"] = "1000000000"
+	} else if req.Params["srcAccount"] == "" && req.Params["core"] == "S" {
+		Params["srcAccount"] = "6000000000"
 	} else {
 		Params["srcAccount"] = req.Params["srcAccount"]
 	}
 	typeTamp := txType
 	if req.Params["featureCode"] == "404" {
 		typeTamp = "25"
+	} else if req.Params["featureCode"] == "319" {
+		typeTamp = "A17"
 	} else {
 		typeTamp = req.TxType
 	}
@@ -106,6 +110,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	if req.Params["featureCode"] == "319" || req.Params["featureCode"] == "303" {
 		Params["srcAccType"] = "00"
 	}
+	log.Infof("send Data to Get: ", Params)
 	gateMsg := transport.SendToGate("gate.shared", typeTamp, Params)
 	log.Infof("LOG Get :", gateMsg)
 	if gateMsg.ResponseCode == "00" {
@@ -120,7 +125,78 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 				"rpFee":     gateMsg.Data["rpFee"],
 			}
 			gateMsg.Data["txFee"] = gateMsg.Data["rpFeeStruk"]
-		case "01", "02", "03", "04": // PLN Prepaid, Telco Postpaid, PLN Postpaid, PLN Non Taglis
+		case "03", "04", "08": // AJ
+			gateMsg.Data["txFee"] = gateMsg.Data["fee"]
+
+			if txType == "03" {
+				var tagihan []interface{}
+				var ok bool
+				if tagihan, ok = gateMsg.Data["tagihan"].([]interface{}); !ok {
+					log.InfoS("error parsing tagihan")
+					return nil
+				}
+				if tagihan == nil || len(tagihan) == 0 {
+					log.InfoS("tagihan nil")
+					return nil
+				}
+				var denda float64 = 0
+				var periodToBePaid1 int
+				var periodToBePaid2 int
+				var dueDate string
+				var slaAwal string
+				var slaAkhir string
+				var shaAwal string
+				var shaAkhir string
+				var periodPaid string
+				for index, tag := range tagihan {
+					log.Infof("tagihan : ", tag)
+					mapTag := tag.(map[string]interface{})
+					if len(tagihan) == 1 {
+						slaAwal = mapTag["slalwbp1"].(string)
+						shaAkhir = mapTag["sahlwbp1"].(string)
+						periodToBePaid1, _ = strconv.Atoi(mapTag["periodBillToBePaid"].(string))
+						denda, _ = strconv.ParseFloat(mapTag["penaltyToBePaid"].(string), 64)
+						dueDate = mapTag["dueDate"].(string)
+					} else {
+
+						if index == 0 {
+							periodToBePaid1, _ = strconv.Atoi(mapTag["periodBillToBePaid"].(string))
+							slaAwal = mapTag["slalwbp1"].(string)
+							shaAwal = mapTag["sahlwbp1"].(string)
+						}
+						if index == len(tagihan)-1 {
+							periodToBePaid2, _ = strconv.Atoi(mapTag["periodBillToBePaid"].(string))
+							slaAkhir = mapTag["slalwbp1"].(string)
+							shaAkhir = mapTag["sahlwbp1"].(string)
+						}
+						if index != 0 {
+							periodPaid = periodPaid + "," + mapTag["periodBillToBePaid"].(string)
+							dueDate = dueDate + "," + mapTag["dueDate"].(string)
+						} else {
+							periodPaid = mapTag["periodBillToBePaid"].(string)
+							dueDate = mapTag["dueDate"].(string)
+						}
+						dendaPaid, _ := strconv.ParseFloat(mapTag["penaltyToBePaid"].(string), 64)
+						denda = denda + dendaPaid
+					}
+				}
+				if len(tagihan) == 1 {
+					gateMsg.Data["standMeter"] = slaAwal + "-" + shaAkhir
+					gateMsg.Data["periodPaid"] = periodToBePaid1
+					gateMsg.Data["penaltyToBePaid"] = denda
+					gateMsg.Data["dueDate"] = dueDate
+				} else {
+					if periodToBePaid1 < periodToBePaid2 {
+						gateMsg.Data["standMeter"] = slaAwal + "-" + shaAkhir
+					} else {
+						gateMsg.Data["standMeter"] = slaAkhir + "-" + shaAwal
+					}
+					gateMsg.Data["penaltyToBePaid"] = denda
+					gateMsg.Data["periodPaid"] = periodPaid
+					gateMsg.Data["dueDate"] = dueDate
+				}
+			}
+		case "01", "02": // PLN Prepaid, Telco Postpaid, PLN Postpaid, PLN Non Taglis
 			var amount float64 = 0
 			var err error
 			if v, ok := gateMsg.Data["billAmount"]; ok && v != "" {
@@ -167,6 +243,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 		} else if gateMsg.ResponseCode == "45" {
 			gateMsg.Description = "Tagihan Sedang Dalam Proses"
 		}
+
 		res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))
 	}
 

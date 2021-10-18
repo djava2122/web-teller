@@ -355,6 +355,56 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 		} else {
 			res.Response, _ = json.Marshal(newResponse("80", "Data Not Found"))
 		}
+	} else if feature == "Reinquiry" {
+		params := map[string]string{
+			"type":            endDate,
+			"referenceNumber": req.Params["referenceNumber"],
+		}
+		gateMsg := transport.SendToGate("gate.shared", "B003", params)
+		log.Infof("[%s] request: %s", req.Headers["Request-ID"], gateMsg)
+		if gateMsg.ResponseCode == "00" {
+			gateMsg.Data["responseCode"] = gateMsg.ResponseCode
+			gateMsg.Data["message"] = gateMsg.Description
+			gateMsg.Data["featureCode"] = req.Params["startDate"]
+			gateMsg.Data["txStatus"] = gateMsg.Description
+			gateMsg.Data["txRefNumber"] = req.Params["referenceNumber"]
+			gateMsg.Data["txDate"] = time.Now().Format("2006-01-02 15:04:05")
+			gateMsg.Data["featureName"] = req.Params["featureName"]
+			if gateMsg.Data["featureCode"] == "319" || gateMsg.Data["featureCode"] == "303" {
+				gateMsg.Data["amount"] = gateMsg.Data["totalAmount"]
+				gateMsg.Data["customerReference"] = gateMsg.Data["customerId"]
+			}
+			var receipt repo.GetReceipt
+			receipt.Id = 0
+			receipt.JumlahCetak = 0
+			receipt.Receipt = gateMsg.Data
+			recp, _ := json.Marshal(gateMsg.Data)
+			updateTabel := repo.Transaction.UpdateMpn(gateMsg.ResponseCode, gateMsg.Description, string(recp), req.Params["referenceNumber"])
+			log.Infof("update table teller :", updateTabel)
+			res.Response, _ = json.Marshal(successResp(receipt))
+		} else {
+			receipt, _ := repo.Transaction.GetTrxCustom(req.Params["referenceNumber"], "All", time.Now().Format("2006-01-02"))
+			log.Infof("[%s] request: %s", req.Headers["Request-ID"], receipt)
+			sts := "FAILED"
+			if gateMsg.ResponseCode == "06" {
+				receipt[0].Receipt["responseCode"] = "06"
+				receipt[0].Receipt["txStatus"] = "PENDING"
+				sts = "PENDING"
+			} else {
+				gateMsg.ResponseCode = "19"
+				receipt[0].Receipt["responseCode"] = "91"
+				receipt[0].Receipt["txStatus"] = "FAILED"
+				sts = "FAILED"
+			}
+			recp, _ := json.Marshal(receipt[0].Receipt)
+			updateTabel := repo.Transaction.UpdateMpn(gateMsg.ResponseCode, sts, string(recp), req.Params["referenceNumber"])
+			log.Infof("update table teller :", updateTabel)
+			if receipt != nil {
+				res.Response, _ = json.Marshal(respCekStatus(receipt, gateMsg.ResponseCode, gateMsg.Description))
+			} else {
+				res.Response, _ = json.Marshal(newResponse("80", "Data Not Found"))
+			}
+		}
 	} else {
 		srcAccount := req.Params["srcAccount"]
 		req.Params["account"] = req.Params["srcAccount"]
