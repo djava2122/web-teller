@@ -389,6 +389,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				gateMsg.Data["featureName"] = val.FeatureName
 				gateMsg.Data["fee"] = params["fee"]
 				gateMsg.Data["featureCode"] = val.FeatureCode
+				gateMsg.Data["txType"] = val.Txtype
 				gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 				gateMsg.Data["responseCode"] = gateMsg.ResponseCode
 				gateMsg.Data["message"] = gateMsg.Description
