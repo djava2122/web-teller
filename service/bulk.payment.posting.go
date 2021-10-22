@@ -235,6 +235,10 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			} else if val.FeatureCode != "302" {
 				params["formatType"] = "506"
 			}
+			if val.FeatureCode == "202" {
+				params["unsold"] = val.Unsold
+				params["token"] = val.Token
+			}
 			if val.FeatureName != "MPN" {
 				inqDataObj.Visit(func(key []byte, v *fastjson.Value) {
 					if v.Type() == fastjson.TypeString {
@@ -287,9 +291,6 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 		log.Infof("['%s'] Response Gate: %v", req.Headers["Request-ID"], gateMsg)
 		if gateMsg.ResponseCode == "00" {
 			if val.FeatureCode == "319" || val.FeatureCode == "303" {
-				var rec map[string]interface{}
-				json.Unmarshal([]byte(val.PaymentOptions), &rec)
-				gateMsg.Data = rec
 				if val.Txtype == "03" {
 					var tagihan []interface{}
 					var ok bool
@@ -432,92 +433,45 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 
 				log.Infof("Data Tampung: ", gateMsg.Data)
 			}
+			mpnPending := false
+			if val.FeatureCode == "404" {
+				if gateMsg.ResponseCode == "06" || gateMsg.ResponseCode == "90" || gateMsg.ResponseCode == "92" {
+					mpnPending = true
+				} else {
+					mpnPending = false
+				}
+			}
 			if gateMsg.ResponseCode == "19" {
+				var rec map[string]interface{}
+				json.Unmarshal([]byte(val.PaymentOptions), &rec)
+				gateMsg.Data = rec
 				gateMsg.Data["txStatus"] = "FAILED"
 				sts = "FAILED"
-			} else if gateMsg.ResponseCode == "06" || gateMsg.ResponseCode == "05" {
+			} else if gateMsg.ResponseCode == "06" || gateMsg.ResponseCode == "05" || mpnPending == true {
+				var rec map[string]interface{}
+				json.Unmarshal([]byte(val.PaymentOptions), &rec)
+				gateMsg.Data = rec
 				gateMsg.ResponseCode = "06"
 				gateMsg.Data["amount"] = val.Amount
 				gateMsg.Data["productName"] = val.ProductName
-				if val.Txtype == "03" {
-					var tagihan []interface{}
-					var ok bool
-					if tagihan, ok = gateMsg.Data["tagihan"].([]interface{}); !ok {
-						log.InfoS("error parsing tagihan")
-						return nil
-					}
-					if tagihan == nil || len(tagihan) == 0 {
-						log.InfoS("tagihan nil")
-						return nil
-					}
-					var denda float64 = 0
-					var periodToBePaid1 int
-					var periodToBePaid2 int
-					var dueDate string
-					var slaAwal string
-					var slaAkhir string
-					var shaAwal string
-					var shaAkhir string
-					var periodPaid string
-					for index, tag := range tagihan {
-						log.Infof("tagihan : ", tag)
-						mapTag := tag.(map[string]interface{})
-						if len(tagihan) == 1 {
-							slaAwal = mapTag["slalwbp1"].(string)
-							shaAkhir = mapTag["sahlwbp1"].(string)
-							periodToBePaid1, _ = strconv.Atoi(mapTag["periodBillToBePaid"].(string))
-							denda, _ = strconv.ParseFloat(mapTag["penaltyToBePaid"].(string), 64)
-							dueDate = mapTag["dueDate"].(string)
-						} else {
-
-							if index == 0 {
-								periodToBePaid1, _ = strconv.Atoi(mapTag["periodBillToBePaid"].(string))
-								slaAwal = mapTag["slalwbp1"].(string)
-								shaAwal = mapTag["sahlwbp1"].(string)
-							}
-							if index == len(tagihan)-1 {
-								periodToBePaid2, _ = strconv.Atoi(mapTag["periodBillToBePaid"].(string))
-								slaAkhir = mapTag["slalwbp1"].(string)
-								shaAkhir = mapTag["sahlwbp1"].(string)
-							}
-							if index != 0 {
-								periodPaid = periodPaid + "," + mapTag["periodBillToBePaid"].(string)
-								dueDate = dueDate + "," + mapTag["dueDate"].(string)
-							} else {
-								periodPaid = mapTag["periodBillToBePaid"].(string)
-								dueDate = mapTag["dueDate"].(string)
-							}
-							dendaPaid, _ := strconv.ParseFloat(mapTag["penaltyToBePaid"].(string), 64)
-							denda = denda + dendaPaid
-						}
-					}
-					if len(tagihan) == 1 {
-						gateMsg.Data["standMeter"] = slaAwal + "-" + shaAkhir
-						gateMsg.Data["periodPaid"] = periodToBePaid1
-						gateMsg.Data["penaltyToBePaid"] = denda
-						gateMsg.Data["dueDate"] = dueDate
-					} else {
-						if periodToBePaid1 < periodToBePaid2 {
-							gateMsg.Data["standMeter"] = slaAwal + "-" + shaAkhir
-						} else {
-							gateMsg.Data["standMeter"] = slaAkhir + "-" + shaAwal
-						}
-						gateMsg.Data["penaltyToBePaid"] = denda
-						gateMsg.Data["periodPaid"] = periodPaid
-						gateMsg.Data["dueDate"] = dueDate
-					}
-				}
-				if val.FeatureCode == "404" {
+				if mpnPending == true {
 					gateMsg.Data["txStatus"] = "PENDING"
 					gateMsg.Description = "Silahkan Cetak BPN Sementara"
+				} else if val.FeatureCode == "202" {
+					gateMsg.Data["txStatus"] = "PENDING"
+					gateMsg.Description = "Silahkan Advice Manual pada menu cetak ulang"
 				} else {
 					gateMsg.Data["txStatus"] = "PENDING"
 				}
 				sts = "PENDING"
 			} else {
+				if val.FeatureCode == "202" || val.FeatureCode == "303" {
+					var rec map[string]interface{}
+					json.Unmarshal([]byte(val.PaymentOptions), &rec)
+					gateMsg.Data = rec
+				}
 				gateMsg.Data["txStatus"] = "FAILED"
 				sts = "FAILED"
-				// gateMsg.Data["txStatus"] = gateMsg.Description
 			}
 			log.Infof("data gateData: ", gateMsg.Data)
 			tampungData["customerReference"] = val.CustomerReference
@@ -530,6 +484,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			}
 
 			data, _ := json.Marshal(tampungData)
+
 			gateMsg.Data["txDate"] = params["dateTime"]
 			gateMsg.Data["customerReference"] = val.CustomerReference
 			gateMsg.Data["featureName"] = val.FeatureName
@@ -537,7 +492,9 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 			gateMsg.Data["message"] = gateMsg.Description
 			gateMsg.Data["responseCode"] = gateMsg.ResponseCode
-
+			if val.FeatureCode == "202" || val.FeatureCode == "303" {
+				data, _ = json.Marshal(gateMsg.Data)
+			}
 			newDataTrx = append(newDataTrx, gateMsg.Data)
 			//res.Response, _ = json.Marshal(newResponseWithData(gateMsg.ResponseCode, ParseRC(gateMsg.ResponseCode), gateMsg.Data))
 			params["featureGroupCode"] = val.FeatureGroupCode

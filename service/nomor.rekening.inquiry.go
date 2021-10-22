@@ -73,11 +73,11 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 	sql := ""
 	jenis, _ := strconv.Atoi(req[0:1])
 	if jenis <= 3 {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'npwp' as npwp, fields -> 'payerName'as payerName, fields -> 'payerAddress' as payerAddress, fields->'taxAccount' as taxAccount, fields -> 'depositTypeCode'as depositTypeCode,fields -> 'taxPeriod' as taxPeriod, fields -> 'skNumber' as skNumber,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'ntpn' as ntpn, fields -> 'nop' as nop from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06')"
+		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'npwp' as npwp, fields -> 'payerName'as payerName, fields -> 'payerAddress' as payerAddress, fields->'taxAccount' as taxAccount, fields -> 'depositTypeCode'as depositTypeCode,fields -> 'taxPeriod' as taxPeriod, fields -> 'skNumber' as skNumber,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'ntpn' as ntpn, fields -> 'nop' as nop from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
 	} else if jenis >= 7 {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'kl' as kl, fields -> 'unitEselon' as unitEselon, fields -> 'satkerCode' as satkerCode,  fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4)  and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06')"
+		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'kl' as kl, fields -> 'unitEselon' as unitEselon, fields -> 'satkerCode' as satkerCode,  fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4)  and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
 	} else {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName, cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode, fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06')"
+		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName, cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode, fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
 	}
 	log.Infof("query : ", sql)
 	rows, _ := db.Query(sql, startDate, endDate, req, req)
@@ -153,7 +153,7 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 		} else if dt.ResponseCode == "99" || dt.ResponseCode == "19" {
 			status = "FAILED"
 		} else {
-			sql = "select trrfnm, trrspc, fields -> 'dateTime' as dateTime, fields -> 'inqData' as inqData, fields -> 'termID' as termID, fields -> 'termType' as termType, cast(isomsg -> '4' as integer)/100 as amount, fields -> 'additional' as additional, fields -> 'srcAccount' as srcAccount from mgate.t_transaction where (rtdate between $1 and $2 ) and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and trrspc = '06'"
+			sql = "select trrfnm, trrspc, fields -> 'dateTime' as dateTime, fields -> 'inqData' as inqData, fields -> 'termID' as termID, fields -> 'termType' as termType, cast(isomsg -> '4' as integer)/100 as amount, fields -> 'additional' as additional, fields -> 'srcAccount' as srcAccount from mgate.t_transaction where (rtdate between $1 and $2 ) and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '06'  or trrspc = '90'  or trrspc = '92')"
 			rows, _ = db.Query(sql, startDate, endDate, req, req)
 			for rows.Next() {
 				Rdt := ReqMPN{}
@@ -370,7 +370,10 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 			gateMsg.Data["txRefNumber"] = req.Params["referenceNumber"]
 			gateMsg.Data["txDate"] = time.Now().Format("2006-01-02 15:04:05")
 			gateMsg.Data["featureName"] = req.Params["featureName"]
-			if gateMsg.Data["featureCode"] == "319" || gateMsg.Data["featureCode"] == "303" {
+			if gateMsg.Data["featureCode"] == "202" {
+				gateMsg.Data["amount"] = gateMsg.Data["rpPayment"]
+				gateMsg.Data["customerReference"] = gateMsg.Data["customerId"]
+			} else if gateMsg.Data["featureCode"] == "319" || gateMsg.Data["featureCode"] == "303" {
 				gateMsg.Data["amount"] = gateMsg.Data["totalAmount"]
 				gateMsg.Data["customerReference"] = gateMsg.Data["customerId"]
 			}
