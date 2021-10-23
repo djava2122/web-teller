@@ -17,6 +17,7 @@ import (
 
 type GetMgateStruct struct {
 	TxRefNumber       string         `json:txRefNumber`
+	TermId            sql.NullString `json:termId`
 	ResponseCode      string         `json:responseCode`
 	TxDate            string         `json:txDate`
 	BookDate          sql.NullString `json:bookDate`
@@ -73,11 +74,11 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 	sql := ""
 	jenis, _ := strconv.Atoi(req[0:1])
 	if jenis <= 3 {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'npwp' as npwp, fields -> 'payerName'as payerName, fields -> 'payerAddress' as payerAddress, fields->'taxAccount' as taxAccount, fields -> 'depositTypeCode'as depositTypeCode,fields -> 'taxPeriod' as taxPeriod, fields -> 'skNumber' as skNumber,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'ntpn' as ntpn, fields -> 'nop' as nop from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
+		sql = "select fields -> 'termID' as termID, trrfnm, trrspc, concat(rtdate ,' ', isomsg -> '12') as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'npwp' as npwp, fields -> 'payerName'as payerName, fields -> 'payerAddress' as payerAddress, fields->'taxAccount' as taxAccount, fields -> 'depositTypeCode'as depositTypeCode,fields -> 'taxPeriod' as taxPeriod, fields -> 'skNumber' as skNumber,cast(isomsg -> '4' as float)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'ntpn' as ntpn, fields -> 'nop' as nop from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
 	} else if jenis >= 7 {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName,cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'kl' as kl, fields -> 'unitEselon' as unitEselon, fields -> 'satkerCode' as satkerCode,  fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4)  and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
+		sql = "select fields -> 'termID' as termID, trrfnm, trrspc, concat(rtdate ,' ', isomsg -> '12') as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName,cast(isomsg -> '4' as float)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'kl' as kl, fields -> 'unitEselon' as unitEselon, fields -> 'satkerCode' as satkerCode,  fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4)  and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
 	} else {
-		sql = "select trrfnm, trrspc, fields -> 'trxDate' as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName, cast(isomsg -> '4' as integer)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode, fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
+		sql = "select fields -> 'termID' as termID, trrfnm, trrspc, concat(rtdate ,' ', isomsg -> '12') as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , fields -> 'stan' as stan, fields -> 'customerId' as customerReference, fields -> 'payerName'as payerName, cast(isomsg -> '4' as float)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode, fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92')"
 	}
 	log.Infof("query : ", sql)
 	rows, _ := db.Query(sql, startDate, endDate, req, req)
@@ -89,6 +90,7 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 		dt := GetMgateStruct{}
 		if jenis <= 3 {
 			err = rows.Scan(
+				&dt.TermId,
 				&dt.TxRefNumber,
 				&dt.ResponseCode,
 				&dt.TxDate,
@@ -110,6 +112,7 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 			)
 		} else if jenis >= 7 {
 			err = rows.Scan(
+				&dt.TermId,
 				&dt.TxRefNumber,
 				&dt.ResponseCode,
 				&dt.TxDate,
@@ -127,6 +130,7 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 			)
 		} else {
 			err = rows.Scan(
+				&dt.TermId,
 				&dt.TxRefNumber,
 				&dt.ResponseCode,
 				&dt.TxDate,
@@ -147,6 +151,17 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 		dt.FeatureCode = "404"
 		dt.FeatureName = "MPN"
 		status := ""
+		var code string
+		var name string
+		var trxType string
+		var src string
+		if dt.TermId.String == "WTELLER" || dt.TermId.String == "KWTELLER" {
+			code, name, trxType, src, _ = repo.Transaction.GetBranch(dt.TxRefNumber)
+			log.Infof("update table teller :", name)
+		} else {
+			code = "ID0011001"
+			name = "1001 - Cabang Utama"
+		}
 		resp := make(map[string]interface{})
 		if dt.ResponseCode == "00" {
 			status = "SUCCESS"
@@ -249,6 +264,10 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 						"satkerCode":        dt.SatkerCode.String,
 						"featureCode":       dt.FeatureCode,
 						"featureName":       dt.FeatureName,
+						"branchCode":        code,
+						"branchName":        name,
+						"transactionType":   trxType,
+						"srcAccount":        src,
 						"txStatus":          status,
 					}
 				}
@@ -297,6 +316,10 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 			"satkerCode":        dt.SatkerCode.String,
 			"featureCode":       dt.FeatureCode,
 			"featureName":       dt.FeatureName,
+			"branchCode":        code,
+			"branchName":        name,
+			"transactionType":   trxType,
+			"srcAccount":        src,
 			"txStatus":          status,
 		}
 		log.Infof("Log Respon Mgate: ", dt)
@@ -416,6 +439,10 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 			res.Response, _ = json.Marshal(newResponse("01", "Bad Request"))
 		} else {
 			gateMsg := transport.SendToGate("gate.shared", "01", req.Params)
+			if gateMsg.Data["customerName"] == "" {
+				gateMsg.ResponseCode = "80"
+				gateMsg.Description = "Data Not Found"
+			}
 			log.Infof("[%s] Info: %v", req.Params)
 			if gateMsg.ResponseCode == "00" {
 				res.Response, _ = json.Marshal(successResp(gateMsg.Data))

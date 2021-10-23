@@ -141,6 +141,9 @@ func BuildDataTransaction(data map[string]string, params map[string]string, stat
 	trx.UpdatedBy = data["tellerID"]
 	trx.TransactionStatus = status
 	trx.BranchCode = params["branchCode"]
+	trx.BranchName = params["branchName"]
+	trx.TransactionType = params["transactionType"]
+	trx.SrcAccount = params["srcAccount"]
 	trx.ResponseCode = code
 	trx.Receipt = params["receipt"]
 	log.Infof("asasaaasas:", trx)

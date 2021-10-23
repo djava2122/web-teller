@@ -33,16 +33,29 @@ type MTransaction struct {
 	Updated           string  `json:"updated"`
 	UpdatedBy         string  `json:"updatedBy"`
 	BranchCode        string  `json:"branchCode"`
+	BranchName        string  `json:"branchName"`
+	TransactionType   string  `json:transactionType`
+	SrcAccount        string  `json:srcAccount`
 	ResponseCode      string  `json:"responseCode"`
 	Receipt           string  `json:"receipt"`
 }
 
 type GetReceipt struct {
-	Id          int                    `json:id`
-	Receipt     map[string]interface{} `json:receipt`
-	JumlahCetak int                    `json:jumlah_cetak`
+	Id              int                    `json:id`
+	BranchCode      string                 `json:"branchCode"`
+	BranchName      string                 `json:"branchName"`
+	TransactionType string                 `json:transactionType`
+	SrcAccount      string                 `json:srcAccount`
+	Receipt         map[string]interface{} `json:receipt`
+	JumlahCetak     int                    `json:jumlah_cetak`
 }
-
+type Mbranch struct {
+	BranchCode      string `json:"branchCode"`
+	BranchName      string `json:"branchName"`
+	TransactionType string `json:transactionType`
+	SrcAccount      string `json:srcAccount`
+	JumlahCetak     int    `json:jumlah_cetak`
+}
 type UCetak struct {
 	Id    string `json:"id"`
 	Cetak int    `json:"cetak"`
@@ -105,16 +118,16 @@ func (_ transaction) Save(trx MTransaction) error {
 	sql := `insert into t_transaction (
 				reference_number, feature_id, feature_code, feature_name, product_id, product_code, product_name,
 				biller_name, transaction_date, transaction_amount, fee, merchant_type, currency_code, customer_reference, created, createdby, 
-				updated, updatedby, transaction_status, branch_code, response_code, feature_group_name, feature_group_code, receipt
+				updated, updatedby, transaction_status, branch_code, response_code, feature_group_name, feature_group_code, src_account, trx_type, branch_name, receipt
 			) values (
-					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
+					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
 			)`
 
 	ar, err := pg.DB.Exec(sql,
 		trx.ReferenceNumber, trx.FeatureId, trx.FeatureCode, trx.FeatureName, trx.ProductId, trx.ProductCode,
 		trx.ProductName, trx.BillerName, trx.TransactionDate, trx.TransactionAmount, trx.Fee, trx.MerchantType, trx.CurrencyCode,
 		trx.CustomerReference, trx.Created, trx.CreatedBy, trx.Updated, trx.UpdatedBy, trx.TransactionStatus, trx.BranchCode,
-		trx.ResponseCode, trx.FeatureGroupName, trx.FeatureGroupCode, trx.Receipt)
+		trx.ResponseCode, trx.FeatureGroupName, trx.FeatureGroupCode, trx.SrcAccount, trx.TransactionType, trx.BranchName, trx.Receipt)
 	log.Infof("[%s] Insert Table: %v", ar)
 
 	if err != nil {
@@ -126,7 +139,7 @@ func (_ transaction) Save(trx MTransaction) error {
 }
 
 func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
-	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code from t_transaction ")
+	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code,branch_name, trx_type, src_account from t_transaction ")
 	if teller != "" {
 		query.WriteString(fmt.Sprintf(" WHERE createdby = '%s'", teller))
 	}
@@ -154,6 +167,9 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 			&datas.CurrencyCode,
 			&datas.CreatedBy,
 			&datas.BranchCode,
+			&datas.BranchName,
+			&datas.TransactionType,
+			&datas.SrcAccount,
 		)
 		if err != nil {
 			return nil, err
@@ -165,7 +181,7 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 }
 
 func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceipt, err error) {
-	query := bytes.NewBufferString("select id, receipt, jumlah_cetak from t_transaction")
+	query := bytes.NewBufferString("select id, branch_code, branch_name, trx_type, src_account, receipt, jumlah_cetak from t_transaction")
 	if teller != "" {
 		query.WriteString(fmt.Sprintf(" WHERE (reference_number = '%s' or customer_reference = '%s') and (response_code = '00' or response_code = '06')", teller, teller))
 	}
@@ -184,10 +200,17 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 		var tampung string
 		err := rows.Scan(
 			&datas.Id,
+			&datas.BranchCode,
+			&datas.BranchName,
+			&datas.TransactionType,
+			&datas.SrcAccount,
 			&tampung,
 			&datas.JumlahCetak,
 		)
 		json.Unmarshal([]byte(tampung), &datas.Receipt)
+		datas.Receipt["BranchName"] = datas.BranchCode[6:9] + datas.BranchName
+		datas.Receipt["TransactionType"] = datas.TransactionType
+		datas.Receipt["SrcAccount"] = datas.SrcAccount
 		if err != nil {
 			return nil, err
 		}
@@ -212,6 +235,18 @@ func (_ transaction) GetTransactionReceipt(reffNumber string) (result interface{
 	}
 
 	return nil
+}
+func (_ transaction) GetBranch(reffNumber string) (code, name, trxType, src string, err error) {
+	sql := "select branch_code,branch_name, trx_type, src_account from t_transaction where reference_number = $1"
+
+	err = pg.DB.QueryRow(sql, reffNumber).Scan(&code, &name, &trxType, &src)
+	log.Infof("Select receip: ", err)
+
+	if err == nil {
+		return code, name, trxType, src, err
+	}
+
+	return code, name, trxType, src, err
 }
 
 var Transaction transaction

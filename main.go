@@ -23,7 +23,7 @@ func main() {
 			"REDIS_URL",
 			"REDIS_POOLSIZE",
 		),
-		micro.RequestTimeout(time.Second*125),
+		micro.RequestTimeout(time.Second*135),
 	)
 
 	log.InfoS("starting service: " + micro.GetServiceName())
