@@ -26,5 +26,5 @@ service WebTeller {
     rpc InquiryNomorRekening (APIREQ) returns (APIRES);
     rpc UpdateCetak (APIREQ) returns (APIRES);
     rpc ReInquiryMPN (APIREQ) returns (APIRES);
-    
+    rpc InquirySiskohat (APIREQ) returns (APIRES);
 }
