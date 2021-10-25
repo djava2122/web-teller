@@ -61,7 +61,13 @@ type ReqMPN struct {
 	Additional      map[string]string `json:additional`
 }
 
-func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
+type RespReceipt struct {
+	Id          int                    `json:id`
+	Receipt     map[string]interface{} `json:receipt`
+	JumlahCetak int                    `json:jumlah_cetak`
+}
+
+func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 	dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -85,6 +91,7 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
+	var rc string
 	log.Infof("Test : ", rows)
 	for rows.Next() {
 		dt := GetMgateStruct{}
@@ -155,6 +162,7 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 		var name string
 		var trxType string
 		var src string
+		log.Infof("log quiry mgate 1 :", dt)
 		if dt.TermId.String == "WTELLER" || dt.TermId.String == "KWTELLER" {
 			code, name, trxType, src, _ = repo.Transaction.GetBranch(dt.TxRefNumber)
 			log.Infof("update table teller :", name)
@@ -162,7 +170,9 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 			code = "ID0011001"
 			name = "1001 - Cabang Utama"
 		}
-		resp := make(map[string]interface{})
+		tampungDt := dt
+		var resp RespReceipt
+		rc = dt.ResponseCode
 		if dt.ResponseCode == "00" {
 			status = "SUCCESS"
 		} else if dt.ResponseCode == "99" || dt.ResponseCode == "19" {
@@ -207,6 +217,7 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 				gateMsg := transport.SendToGate("gate.shared", "27", reqParams)
 				log.Infof("Gate send response:  ", gateMsg)
 
+				rc = gateMsg.ResponseCode
 				if gateMsg.ResponseCode == "00" {
 					status = "SUCCESS"
 				} else if gateMsg.ResponseCode == "AW" {
@@ -215,12 +226,18 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 				} else if gateMsg.ResponseCode == "99" || dt.ResponseCode == "19" {
 					status = "FAILED"
 				} else {
+					dt.ResponseCode = gateMsg.ResponseCode
 					status = "PENDING"
 				}
 				log.Infof("Reinquiry Mgate rc timeout :", gateMsg)
 				if gateMsg.ResponseCode == "00" {
-					resp["Receipt"] = gateMsg.Data
+					resp.Receipt = gateMsg.Data
 					gateMsg.Data["featureCode"] = dt.FeatureCode
+					gateMsg.Data["branchCode"] = code
+					gateMsg.Data["branchName"] = name
+					gateMsg.Data["transactionType"] = trxType
+					gateMsg.Data["srcAccount"] = src
+					gateMsg.Data["responseCode"] = dt.ResponseCode
 					gateMsg.Data["featureName"] = dt.FeatureName
 					gateMsg.Data["txRefNumber"] = dt.TxRefNumber
 					gateMsg.Data["txDate"] = reqParams["orgDateTime"]
@@ -235,44 +252,72 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 						log.Infof("update table teller :", updateTabel)
 					}
 				} else {
-					resp["Receipt"] = map[string]string{
-						"txRefNumber":       dt.TxRefNumber,
-						"responseCode":      dt.ResponseCode,
-						"txDate":            dt.TxDate,
-						"bookDate":          dt.BookDate.String,
-						"ntb":               dt.Ntb.String,
-						"ntpn":              dt.Ntpn.String,
-						"stan":              dt.Stan.String,
-						"customerReference": dt.CustomerReference.String,
-						"npwp":              dt.Npwp.String,
-						"payerName":         dt.PrayerName.String,
-						"payerAddress":      dt.PrayerAddress.String,
-						"nop":               dt.Nop.String,
-						"taxAccount":        dt.TaxAccount.String,
-						"depositTypeCode":   dt.DepositTypeCode.String,
-						"taxPeriod":         dt.TaxPeriod.String,
-						"skNumber":          dt.SkNumber.String,
-						"amount":            dt.Amount.String,
-						"currencyCode":      dt.CurrencyCode.String,
-						"payerId":           dt.PrayerId.String,
-						"documentType":      dt.DocumentType.String,
-						"documentNumber":    dt.DocumentNumber.String,
-						"documentDate":      dt.DocumentDate.String,
-						"kppbcCode":         dt.KppbcCode.String,
-						"kl":                dt.Kl.String,
-						"unitEselon":        dt.UnitEselon.String,
-						"satkerCode":        dt.SatkerCode.String,
-						"featureCode":       dt.FeatureCode,
-						"featureName":       dt.FeatureName,
-						"branchCode":        code,
-						"branchName":        name,
-						"transactionType":   trxType,
-						"srcAccount":        src,
-						"txStatus":          status,
+					sql = "select trrspc, fields -> 'npwp' as npwp, fields -> 'payerName'as payerName, fields -> 'payerAddress' as payerAddress, fields->'taxAccount' as taxAccount, fields -> 'depositTypeCode'as depositTypeCode,fields -> 'taxPeriod' as taxPeriod, fields -> 'skNumber' as skNumber,cast(isomsg -> '4' as float)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'ntpn' as ntpn, fields -> 'nop' as nop,fields -> 'kl' as kl, fields -> 'unitEselon' as unitEselon, fields -> 'satkerCode' as satkerCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode from mgate.t_transaction where rtdate between $1 and $2 and fields -> 'customerId' = $3 and trftcd = 'MPN1' limit 1"
+					rows, _ = db.Query(sql, startDate, endDate, req)
+					for rows.Next() {
+						dt := GetMgateStruct{}
+						err = rows.Scan(
+							&dt.ResponseCode,
+							&dt.Npwp,
+							&dt.PrayerName,
+							&dt.PrayerAddress,
+							&dt.TaxAccount,
+							&dt.DepositTypeCode,
+							&dt.TaxPeriod,
+							&dt.SkNumber,
+							&dt.Amount,
+							&dt.CurrencyCode,
+							&dt.Ntpn,
+							&dt.Nop,
+							&dt.Kl,
+							&dt.UnitEselon,
+							&dt.SatkerCode,
+							&dt.DocumentType,
+							&dt.DocumentNumber,
+							&dt.DocumentDate,
+							&dt.KppbcCode,
+						)
+						log.Infof("err", err)
+						log.Infof("err", err)
+						resp.Receipt = map[string]interface{}{
+							"txRefNumber":       tampungDt.TxRefNumber,
+							"responseCode":      dt.ResponseCode,
+							"txDate":            tampungDt.TxDate,
+							"bookDate":          tampungDt.BookDate.String,
+							"ntb":               tampungDt.TxRefNumber,
+							"ntpn":              tampungDt.Ntpn.String,
+							"stan":              tampungDt.TxRefNumber[0:6],
+							"customerReference": tampungDt.CustomerReference.String,
+							"npwp":              dt.Npwp.String,
+							"payerName":         dt.PrayerName.String,
+							"payerAddress":      dt.PrayerAddress.String,
+							"nop":               dt.Nop.String,
+							"taxAccount":        dt.TaxAccount.String,
+							"depositTypeCode":   dt.DepositTypeCode.String,
+							"taxPeriod":         dt.TaxPeriod.String,
+							"skNumber":          dt.SkNumber.String,
+							"amount":            dt.Amount.String,
+							"currencyCode":      "IDR",
+							"payerId":           dt.PrayerId.String,
+							"documentType":      dt.DocumentType.String,
+							"documentNumber":    dt.DocumentNumber.String,
+							"documentDate":      dt.DocumentDate.String,
+							"kppbcCode":         dt.KppbcCode.String,
+							"kl":                dt.Kl.String,
+							"unitEselon":        dt.UnitEselon.String,
+							"satkerCode":        dt.SatkerCode.String,
+							"featureCode":       tampungDt.FeatureCode,
+							"featureName":       tampungDt.FeatureName,
+							"branchCode":        code,
+							"branchName":        name,
+							"transactionType":   trxType,
+							"srcAccount":        src,
+							"txStatus":          status,
+						}
 					}
 				}
 				result = append(result, resp)
-				log.Infof("result : ", result...)
+				log.Infof("result : ", result)
 				return result, err
 			}
 
@@ -285,11 +330,11 @@ func InitDb(req, startDate, endDate string) (result []interface{}, err error) {
 		// 	"customerReference": dt.CustomerReference,
 		// }
 
-		resp["Id"] = 0
-		resp["JumlahCetak"] = 0
-		resp["Receipt"] = map[string]string{
+		resp.Id = 0
+		resp.JumlahCetak = 0
+		resp.Receipt = map[string]interface{}{
 			"txRefNumber":       dt.TxRefNumber,
-			"responseCode":      dt.ResponseCode,
+			"responseCode":      rc,
 			"txDate":            dt.TxDate,
 			"bookDate":          dt.BookDate.String,
 			"ntb":               dt.Ntb.String,
@@ -369,9 +414,25 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 	// log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
 	if feature == "404" {
 		resp, _ := InitDb(referenceNumber, startDate, endDate)
+		log.Infof("[%s] request: %s", req.Headers["Request-ID"], resp)
 		res.Response, _ = json.Marshal(successResp(resp))
 	} else if feature == "receipt" {
 		receipt, _ := repo.Transaction.GetTrxCustom(referenceNumber, req.Params["startDate"], endDate)
+		for _, trx := range receipt {
+			if trx.Receipt["responseCode"] == "06" && trx.Receipt["featureCode"] == "404" {
+				reff := fmt.Sprint(trx.Receipt["customerReference"])
+				start := fmt.Sprint(trx.Receipt["txDate"])
+				stringSt := start[0:8]
+				endStart, _ := strconv.Atoi(stringSt)
+				stringEd := strconv.Itoa(endStart + 1)
+				log.Infof("start :", stringSt)
+				log.Infof("end :", stringEd)
+				resp, _ := InitDb(reff, stringSt, stringEd)
+				res.Response, _ = json.Marshal(successResp(resp))
+				return nil
+			}
+		}
+		log.Infof("[%s] response Code: %s", req.Headers["Request-ID"], receipt[0].Receipt["responseCode"])
 		log.Infof("[%s] request: %s", req.Headers["Request-ID"], receipt)
 		if receipt != nil {
 			res.Response, _ = json.Marshal(successResp(receipt))

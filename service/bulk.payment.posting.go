@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -399,10 +400,10 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			params["receipt"] = string(dataReceipt)
 			params["txStatus"] = "SUCCESS"
 		} else {
-			gateMsg.Data = make(map[string]interface{})
+			// gateMsg.Data = make(map[string]string{})
 			var sts string
-			bookDate := ""
-			if val.FeatureCode == "404" && gateMsg.ResponseCode != "19" && gateMsg.ResponseCode != "99" {
+			bookDate := fmt.Sprintf("%s", gateMsg.Data["bookDate"])
+			if val.FeatureCode == "404" && gateMsg.ResponseCode != "19" && gateMsg.ResponseCode != "99" && bookDate == "" {
 				var rec map[string]interface{}
 				json.Unmarshal([]byte(val.PaymentOptions), &rec)
 				d := time.Now()
@@ -475,6 +476,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			gateMsg.Data["customerReference"] = val.CustomerReference
 			gateMsg.Data["featureName"] = val.FeatureName
 			gateMsg.Data["featureCode"] = val.FeatureCode
+			gateMsg.Data["bookDate"] = bookDate
 			gateMsg.Data["txRefNumber"] = params["referenceNumber"]
 			gateMsg.Data["message"] = gateMsg.Description
 			gateMsg.Data["responseCode"] = gateMsg.ResponseCode

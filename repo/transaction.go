@@ -48,6 +48,7 @@ type GetReceipt struct {
 	SrcAccount      string                 `json:srcAccount`
 	Receipt         map[string]interface{} `json:receipt`
 	JumlahCetak     int                    `json:jumlah_cetak`
+	ResponseCode    string                 `json:responseCode`
 }
 type Mbranch struct {
 	BranchCode      string `json:"branchCode"`
@@ -181,7 +182,7 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 }
 
 func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceipt, err error) {
-	query := bytes.NewBufferString("select id, branch_code, branch_name, trx_type, src_account, receipt, jumlah_cetak from t_transaction")
+	query := bytes.NewBufferString("select id, branch_code, branch_name, trx_type, src_account, receipt, jumlah_cetak, response_code from t_transaction")
 	if teller != "" {
 		query.WriteString(fmt.Sprintf(" WHERE (reference_number = '%s' or customer_reference = '%s') and (response_code = '00' or response_code = '06')", teller, teller))
 	}
@@ -206,11 +207,13 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 			&datas.SrcAccount,
 			&tampung,
 			&datas.JumlahCetak,
+			&datas.ResponseCode,
 		)
 		json.Unmarshal([]byte(tampung), &datas.Receipt)
-		datas.Receipt["BranchName"] = datas.BranchCode[6:9] + datas.BranchName
-		datas.Receipt["TransactionType"] = datas.TransactionType
-		datas.Receipt["SrcAccount"] = datas.SrcAccount
+		datas.Receipt["branchName"] = datas.BranchCode[6:9] + datas.BranchName
+		datas.Receipt["transactionType"] = datas.TransactionType
+		datas.Receipt["srcAccount"] = datas.SrcAccount
+		datas.Receipt["responseCode"] = datas.ResponseCode
 		if err != nil {
 			return nil, err
 		}
