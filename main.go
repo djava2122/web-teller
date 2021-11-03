@@ -22,6 +22,9 @@ func main() {
 			"DB_URL",
 			"REDIS_URL",
 			"REDIS_POOLSIZE",
+			"URL_SIKOPATUH",
+			"USER_SIKOPATUH",
+			"PASS_SIKOPATUH",
 		),
 		micro.RequestTimeout(time.Second*137),
 	)

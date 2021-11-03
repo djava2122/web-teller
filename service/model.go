@@ -44,3 +44,9 @@ func getData(data map[string]interface{}, key string) string {
 	}
 	return ""
 }
+
+type ResSiskopatuh struct {
+	RC      string `json:"RC"`
+	Message string `json:"message"`
+	Token   string `json:"token"`
+}

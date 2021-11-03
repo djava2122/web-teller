@@ -30,4 +30,5 @@ service WebTeller {
     rpc ReInquiryMPN (APIREQ) returns (APIRES);
     rpc InquirySiskohat (APIREQ) returns (APIRES);
     rpc ReportMpnAll (APIREQ) returns (APIRES);
+    rpc LoginSiskopatuh (APIREQ) returns (APIRES);
 }

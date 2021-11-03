@@ -235,7 +235,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					}
 				})
 			}
-			if val.FeatureCode == "318" {
+			if val.FeatureCode == "305" {
 				params["norangka"] = val.CustomerReference2
 			}
 			if params["fee"] == "0" {
@@ -250,7 +250,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 
 			if val.FeatureCode == "302" || val.FeatureCode == "304" ||
 				val.FeatureCode == "315" || val.FeatureCode == "312" ||
-				val.FeatureCode == "318" || val.FeatureCode == "314" ||
+				val.FeatureCode == "305" || val.FeatureCode == "314" ||
 				val.FeatureCode == "316" || val.FeatureCode == "317" {
 				params["fee"] = params["rpFeeStruk"]
 			} else {
