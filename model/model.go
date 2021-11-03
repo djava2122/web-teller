@@ -317,6 +317,7 @@ type BulkPayment struct {
 	TotalBill          string `json:"totalBill"`
 	TxDate             string `json:"txDate"`
 	SrcAccount         string `json:"srcAccount"`
+	SrcAccountName     string `json:"srcAccountName"`
 	TransactionType    string `json:transactionType`
 	Unsold             string `json:unsold`
 	Token              string `json:token`

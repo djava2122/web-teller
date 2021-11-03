@@ -187,7 +187,9 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 		query.WriteString(fmt.Sprintf(" WHERE (reference_number = '%s' or customer_reference = '%s') and (response_code = '00' or response_code = '06')", teller, teller))
 	}
 	if start != "All" {
-		query.WriteString(fmt.Sprintf(" and  transaction_date between '%s' and '%s'", start, end))
+		tglAwal := start + " 00:00:00"
+		tglAkhir := end + " 23:59:59"
+		query.WriteString(fmt.Sprintf(" and  transaction_date between '%s' and '%s'", tglAwal, tglAkhir))
 	}
 	query.WriteString(" ORDER BY created DESC")
 	log.Infof("Query :", query.String())
@@ -210,7 +212,7 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 			&datas.ResponseCode,
 		)
 		json.Unmarshal([]byte(tampung), &datas.Receipt)
-		datas.Receipt["branchName"] = datas.BranchCode[6:9] + datas.BranchName
+		datas.Receipt["branchName"] = datas.BranchName
 		datas.Receipt["transactionType"] = datas.TransactionType
 		datas.Receipt["srcAccount"] = datas.SrcAccount
 		datas.Receipt["responseCode"] = datas.ResponseCode
