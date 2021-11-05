@@ -33,6 +33,7 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 		res.Response, _ = json.Marshal(newResponse("01", "Bad Request"))
 	} else {
 		gateMsg := transport.SendToGate("gate.shared", req.TxType, req.Params)
+		log.Infof("Log Gate Auth: ", gateMsg.Data)
 		if gateMsg.ResponseCode == "00" {
 
 			//userInfo := transport.SendToGate("gate.shared", "11", map[string]string{
