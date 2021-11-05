@@ -8,10 +8,16 @@ func FormattedTime(date string, formatted string) string {
 }
 
 func ParseRoleTeller(data string) string {
-	if data == "?FDS.MENU.HEAD.TELLER.MENU" {
-		return "00"
+	if data == "?FDS.MENU.MAIN.TELLER" || data == "?KALSEL.MENU.MAIN.TELLER" {
+		return "T"
+	} else if data == "?FDS.MENU.HEAD.TELLER.MENU" || data == "?KALSEL.MENU.HEAD.TELLER.MENU" {
+		return "H"
+	} else if data == "?FDS.MENU.MAIN.BO.CABANG" || data == "?KALSEL.MENU.MAIN.BO.CABANG" {
+		return "B"
+	} else {
+		return "I"
 	}
-	return "01"
+	return "I"
 }
 
 func ParseRC(rc string) string {

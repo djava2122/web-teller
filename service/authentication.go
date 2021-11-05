@@ -36,42 +36,42 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 		log.Infof("Log Gate Auth: ", gateMsg.Data)
 		if gateMsg.ResponseCode == "00" {
 
-			//userInfo := transport.SendToGate("gate.shared", "11", map[string]string{
-			//	"name": id,
-			//	"core": core,
-			//})
+			userInfo := transport.SendToGate("gate.shared", "11", map[string]string{
+				"name": id,
+				"core": core,
+			})
 
-			//if userInfo.ResponseCode == "00" {
-			claims := new(Claims)
-			claims.Core = core
-			claims.TellerID = id
-			claims.TellerPass = pass
-			claims.CoCode = getData(gateMsg.Data, "coCode")
-			claims.TillCoCode = getData(gateMsg.Data, "tillCoCode")
-			claims.CompanyCode = getData(gateMsg.Data, "companyCode")
-			claims.branchName = getData(gateMsg.Data, "branchName")
-			claims.BeginBalance = getData(gateMsg.Data, "saldoAwalHari")
-			claims.CurrentBalance = getData(gateMsg.Data, "saldoSekarang")
+			if userInfo.ResponseCode == "00" {
+				claims := new(Claims)
+				claims.Core = core
+				claims.TellerID = id
+				claims.TellerPass = pass
+				claims.CoCode = getData(gateMsg.Data, "coCode")
+				claims.TillCoCode = getData(gateMsg.Data, "tillCoCode")
+				claims.CompanyCode = getData(gateMsg.Data, "companyCode")
+				claims.branchName = getData(gateMsg.Data, "branchName")
+				claims.BeginBalance = getData(gateMsg.Data, "saldoAwalHari")
+				claims.CurrentBalance = getData(gateMsg.Data, "saldoSekarang")
 
-			token, err := createToken(claims)
-			if err != nil {
-				log.Errorf("generate token failed: %v", err)
-				panic(err)
+				token, err := createToken(claims)
+				if err != nil {
+					log.Errorf("generate token failed: %v", err)
+					panic(err)
+				}
+
+				data := make(map[string]interface{})
+				data["token"] = token
+				data["tellerName"] = getData(gateMsg.Data, "userName")
+				data["role"] = ParseRoleTeller(getData(userInfo.Data, "initApp"))
+				data["branchCode"] = getData(userInfo.Data, "companyCode")
+				data["role"] = ParseRoleTeller(getData(gateMsg.Data, "kdSPV1"))
+				data["branchCode"] = getData(gateMsg.Data, "companyCode")
+				data["branchName"] = getData(gateMsg.Data, "branchName")
+				data["beginBalance"] = getData(gateMsg.Data, "saldoAwalHari")
+				data["CurrentBalance"] = getData(gateMsg.Data, "saldoSekarang")
+
+				res.Response, _ = json.Marshal(successResp(data))
 			}
-
-			data := make(map[string]interface{})
-			data["token"] = token
-			data["tellerName"] = getData(gateMsg.Data, "userName")
-			//data["role"] = ParseRoleTeller(getData(userInfo.Data, "initApp"))
-			//data["branchCode"] = getData(userInfo.Data, "companyCode")
-			data["role"] = ParseRoleTeller(getData(gateMsg.Data, "kdSPV1"))
-			data["branchCode"] = getData(gateMsg.Data, "companyCode")
-			data["branchName"] = getData(gateMsg.Data, "branchName")
-			data["beginBalance"] = getData(gateMsg.Data, "saldoAwalHari")
-			data["CurrentBalance"] = getData(gateMsg.Data, "saldoSekarang")
-
-			res.Response, _ = json.Marshal(successResp(data))
-			//}
 
 		} else {
 			res.Response, _ = json.Marshal(newResponse("02", "Invalid TellerID or Password"))
