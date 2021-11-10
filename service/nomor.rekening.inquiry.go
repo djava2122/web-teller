@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/micro"
 	"gitlab.pactindo.com/ebanking/common/transport"
 	"gitlab.pactindo.com/ebanking/common/trycatch"
 	"gitlab.pactindo.com/ebanking/common/util"
@@ -70,7 +71,9 @@ type RespReceipt struct {
 }
 
 func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
-	dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
+	conf := micro.GetConfig()
+	dsn := conf["URL_MGATE"]
+	// dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Infof("unable to connect db, error : %v", err)

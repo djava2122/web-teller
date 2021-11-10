@@ -23,6 +23,7 @@ func main() {
 			"REDIS_URL",
 			"REDIS_POOLSIZE",
 			"URL_SIKOPATUH",
+			"URL_MGATE",
 			"USER_SIKOPATUH",
 			"PASS_SIKOPATUH",
 		),

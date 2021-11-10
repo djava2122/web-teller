@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/micro"
 	"gitlab.pactindo.com/ebanking/common/trycatch"
 	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 	"gitlab.pactindo.com/ebanking/web-teller/repo"
@@ -32,7 +32,9 @@ func (h *WebTellerHandler) ReportMpnAll(_ context.Context, req *wtproto.APIREQ, 
 }
 
 func InitReport(startDate, endDate string) (result []map[string]interface{}, err error) {
-	dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
+	conf := micro.GetConfig()
+	dsn := conf["URL_MGATE"]
+	// dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Infof("unable to connect db, error : %v", err)
