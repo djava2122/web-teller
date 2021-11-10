@@ -81,6 +81,10 @@ type TransactionReport struct {
 	CurrencyCode      string  `json:"currencyCode"`
 	CreatedBy         string  `json:"createdBy"`
 	BranchCode        string  `json:"branchCode"`
+	BranchName        string  `json:"branchName"`
+	TransactionType   string  `json:transactionType`
+	SrcAccount        string  `json:srcAccount`
+	ResponseCode      string  `json:"responseCode"`
 }
 
 type transaction struct{}
@@ -139,10 +143,12 @@ func (_ transaction) Save(trx MTransaction) error {
 	return nil
 }
 
-func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
-	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code,branch_name, trx_type, src_account from t_transaction ")
-	if teller != "" {
+func (_ transaction) Filter(teller string, cabang string) (result []MTransaction, err error) {
+	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code,branch_name, trx_type, src_account, response_code from t_transaction ")
+	if teller != "" && cabang == "" {
 		query.WriteString(fmt.Sprintf(" WHERE createdby = '%s'", teller))
+	} else if cabang != "" {
+		query.WriteString(fmt.Sprintf(" WHERE branch_code = '%s'", cabang))
 	}
 
 	query.WriteString(" ORDER BY created DESC")
@@ -171,7 +177,11 @@ func (_ transaction) Filter(teller string) (result []MTransaction, err error) {
 			&datas.BranchName,
 			&datas.TransactionType,
 			&datas.SrcAccount,
+			&datas.ResponseCode,
 		)
+		if datas.TransactionType == "TUNAI" {
+			datas.SrcAccount = "-"
+		}
 		if err != nil {
 			return nil, err
 		}

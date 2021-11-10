@@ -36,8 +36,13 @@ func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.A
 	//	res.Response, _ = json.Marshal(newResponse("01", "params endDate cannot be empty"))
 	//	return nil
 	//}
-
-	datas, err := repo.Transaction.Filter(req.Params["teller"])
+	cabang := ""
+	if req.Params["teller"] == "All" {
+		cabang = req.Params["cabang"]
+	} else {
+		cabang = ""
+	}
+	datas, err := repo.Transaction.Filter(req.Params["teller"], cabang)
 	if err != nil {
 		log.Errorf("error get data transaction: %v", err)
 	}
@@ -68,6 +73,10 @@ func ConvertStructTransactionToResult(transaction []repo.MTransaction) []*repo.T
 		data.CurrencyCode = val.CurrencyCode
 		data.CreatedBy = val.CreatedBy
 		data.BranchCode = val.BranchCode
+		data.BranchName = val.BranchName
+		data.ResponseCode = val.ResponseCode
+		data.SrcAccount = val.SrcAccount
+		data.TransactionType = val.TransactionType
 		result = append(result, &data)
 	}
 	return result
