@@ -104,7 +104,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	} else {
 		typeTamp = req.TxType
 	}
-	if req.Params["featureCode"] == "318" {
+	if req.Params["featureCode"] == "305" {
 		Params["norangka"] = req.Params["customerReference2"]
 	}
 	if req.Params["featureCode"] == "319" || req.Params["featureCode"] == "303" {
