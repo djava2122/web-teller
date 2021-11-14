@@ -22,12 +22,7 @@ func (h *WebTellerHandler) ReportMpnAll(_ context.Context, req *wtproto.APIREQ, 
 	startDate := req.Params["startDate"]
 	endDate := req.Params["endDate"]
 	gateTabel, _ := InitReport(startDate, endDate)
-	if gateTabel != nil {
-		res.Response, _ = json.Marshal(successResp(gateTabel))
-	} else {
-		res.Response, _ = json.Marshal(newResponse("99", "Gate Table Error"))
-	}
-
+	res.Response, _ = json.Marshal(successResp(gateTabel))
 	return nil
 }
 
