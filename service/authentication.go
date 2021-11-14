@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/transport"
 	"gitlab.pactindo.com/ebanking/common/trycatch"
+	"strings"
 
 	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 )
@@ -62,9 +62,9 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 				data := make(map[string]interface{})
 				data["token"] = token
 				data["tellerName"] = getData(gateMsg.Data, "userName")
-				data["role"] = ParseRoleTeller(getData(userInfo.Data, "initApp"))
+				//data["role"] = ParseRoleTeller(strings.TrimSpace(getData(userInfo.Data, "initApp")))
 				data["branchCode"] = getData(userInfo.Data, "companyCode")
-				data["role"] = ParseRoleTeller(getData(gateMsg.Data, "kdSPV1"))
+				data["role"] = ParseRoleTeller(strings.TrimSpace(getData(gateMsg.Data, "kdSPV1")))
 				data["branchCode"] = getData(gateMsg.Data, "companyCode")
 				data["branchName"] = getData(gateMsg.Data, "branchName")
 				data["beginBalance"] = getData(gateMsg.Data, "saldoAwalHari")
