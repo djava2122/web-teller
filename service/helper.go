@@ -13,7 +13,7 @@ func ParseRoleTeller(data string) string {
 	} else if data == "?FDS.MENU.HEAD.TELLER" || data == "?KALSEL.MENU.MAIN.HT" || data == "?KALSEL.SYA.HTEL" || data == "?KALSEL.SYA.HTELSKN" || data == "?KALSEL.MENU.MAIN.KBCS" {
 		return "H"
 	} else if data == "?FDS.MENU.MAIN.BO.CABANG" || data == "?KALSEL.MENU.MAIN.BOFLA" || data == "?KALSEL.MENU.MAIN.BOFKL" ||
-		data == "?KALSEL.MENU.MAIN.KBBOFKL" || data == "?KALSEL.APV.USER.MENU.KBBOF" || data == "?KALSEL.SYA.BO" || data == "?KALSEL.SYA.BOSKN" {
+		data == "?KALSEL.MENU.MAIN.KBBOFKL" || data == "?KALSEL.APV.USER.MENU.KBBOF" || data == "?KALSEL.SYA.BO" || data == "?KALSEL.SYA.BOSKN" || data == "?KALSEL.SYA.MENU.BOSKN" {
 		return "B"
 	} else if data == "?KALSEL.SYA.CS" {
 		return "CS"
