@@ -31,6 +31,10 @@ func InitReport(startDate, endDate string) (result []map[string]interface{}, err
 	dsn := conf["URL_MGATE"]
 	// dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
 	db, err := sql.Open("postgres", dsn)
+	defer func() {
+		log.Info("Close DB")
+		db.Close()
+	}()
 	if err != nil {
 		log.Infof("unable to connect db, error : %v", err)
 	}
