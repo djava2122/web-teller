@@ -75,6 +75,9 @@ func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 	dsn := conf["URL_MGATE"]
 	// dsn := fmt.Sprintf("postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable")
 	db, err := sql.Open("postgres", dsn)
+	defer func() {
+		db.Close()
+	}()
 	if err != nil {
 		log.Infof("unable to connect db, error : %v", err)
 	}
