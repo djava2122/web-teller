@@ -8,7 +8,7 @@ func FormattedTime(date string, formatted string) string {
 }
 
 func ParseRoleTeller(data string) string {
-	if data == "?FDS.MENU.MAIN.TELLER" || data == "?KALSEL.MENU.MAIN.TELLER" || data == "?KALSEL.SYA.MENU.TEL" || data == "?KALSEL.SYA.TELSKN" {
+	if data == "?FDS.MENU.MAIN.TELLER" || data == "?KALSEL.MENU.MAIN.TELLER" || data == "?KALSEL.SYA.MENU.TEL" || data == "?KALSEL.SYA.TELSKN" || data == "?KALSEL.SYA.MENU.TKP" || data == "?KALSEL.SYA.MENU.TELSKN" {
 		return "T"
 	} else if data == "?FDS.MENU.HEAD.TELLER" || data == "?KALSEL.MENU.MAIN.HT" || data == "?KALSEL.SYA.HTEL" || data == "?KALSEL.SYA.HTELSKN" || data == "?KALSEL.MENU.MAIN.KBCS" {
 		return "H"
