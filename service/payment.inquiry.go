@@ -242,6 +242,8 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 			gateMsg.Description = "Kode Bank Tidak Ditemukan"
 		} else if gateMsg.ResponseCode == "45" {
 			gateMsg.Description = "Tagihan Sedang Dalam Proses"
+		} else if gateMsg.ResponseCode == "6A" {
+			gateMsg.Description = "Tagihan bulan berjalan belum tersedia"
 		}
 
 		res.Response, _ = json.Marshal(newResponse(gateMsg.ResponseCode, gateMsg.Description))

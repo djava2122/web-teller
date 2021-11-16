@@ -63,7 +63,7 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 				data["token"] = token
 				data["tellerName"] = getData(gateMsg.Data, "userName")
 				//data["role"] = ParseRoleTeller(strings.TrimSpace(getData(userInfo.Data, "initApp")))
-				data["branchCode"] = getData(userInfo.Data, "companyCode")
+				//data["branchCode"] = getData(userInfo.Data, "companyCode")
 				data["role"] = ParseRoleTeller(strings.TrimSpace(getData(gateMsg.Data, "kdSPV1")))
 				data["branchCode"] = getData(gateMsg.Data, "companyCode")
 				data["branchName"] = getData(gateMsg.Data, "branchName")
