@@ -405,11 +405,6 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 	if endDate == "All" {
 		endDate = time.Now().Format("2006-01-02")
 	}
-	log.Infof("[%s] request: %s", req.Headers["Request-ID"], feature)
-	log.Infof("[%s] request: %s", req.Headers["Request-ID"], referenceNumber)
-	log.Infof("[%s] request: %s", req.Headers["Request-ID"], startDate)
-	log.Infof("[%s] request: %s", req.Headers["Request-ID"], endDate)
-
 	// jsonReq, _ := json.Marshal(req)
 	// log.Infof("[%s] request: %v", req.Headers["Request-ID"], string(jsonReq))
 	if feature == "404" {
@@ -420,14 +415,13 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 		receipt, _ := repo.Transaction.GetTrxCustom(referenceNumber, req.Params["startDate"], endDate)
 		for _, trx := range receipt {
 			if trx.Receipt["responseCode"] == "06" && trx.Receipt["featureCode"] == "404" {
-				reff := fmt.Sprint(trx.Receipt["customerReference"])
 				start := fmt.Sprint(trx.Receipt["txDate"])
 				stringSt := start[0:8]
 				endStart, _ := strconv.Atoi(stringSt)
 				stringEd := strconv.Itoa(endStart + 1)
 				log.Infof("start :", stringSt)
 				log.Infof("end :", stringEd)
-				resp, _ := InitDb(reff, stringSt, stringEd)
+				resp, _ := InitDb(referenceNumber, stringSt, stringEd)
 				res.Response, _ = json.Marshal(successResp(resp))
 				return nil
 			}
