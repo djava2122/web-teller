@@ -70,6 +70,11 @@ func (h *WebTellerHandler) Authentication(ctx context.Context, req *wtproto.APIR
 				data["beginBalance"] = getData(gateMsg.Data, "saldoAwalHari")
 				data["CurrentBalance"] = getData(gateMsg.Data, "saldoSekarang")
 
+				if data["role"] == "A" {
+					res.Response, _ = json.Marshal(newResponse("99", "Invalid Role Teller"))
+					return nil
+				}
+
 				res.Response, _ = json.Marshal(successResp(data))
 			}
 

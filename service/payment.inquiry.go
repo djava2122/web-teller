@@ -64,6 +64,16 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	} else {
 		substring = req.Params["branchCode"]
 	}
+
+	// TODO: INI BUAT WHITELIST KODE CABANG
+	//if req.Params["featureName"] == "MPN" {
+	//	branchCode := req.Params["branchCode"]
+	//	if branchCode != "ID0011001" && branchCode != "ID0011007" && branchCode != "ID0011011" && branchCode != "ID0011034" {
+	//		res.Response, _ = json.Marshal(newResponse("99", "Layanan saat ini tidak tersedia"))
+	//		return nil
+	//	}
+	//}
+
 	numbBill := ""
 	txFee := ""
 	if req.Params["featureCode"] == "319" {
