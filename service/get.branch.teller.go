@@ -30,7 +30,7 @@ func (h *WebTellerHandler) GetBranchTeller(_ context.Context, req *wtproto.APIRE
 	if err != nil {
 		return nil
 	}
-	log.Infof("Test query:", rows)
+	//log.Infof("Test query:", rows)
 	for rows.Next() {
 		datas := branchTeller{}
 		err := rows.Scan(

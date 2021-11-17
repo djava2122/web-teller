@@ -47,6 +47,6 @@ func UpdateCetakTransaksi(params map[string]string) repo.UCetak {
 	cetak, _ := strconv.Atoi(params["cetak"])
 	trx.Id = params["id"]
 	trx.Cetak = cetak
-	log.Infof("asasaaasas:", trx)
+	//log.Infof("asasaaasas:", trx)
 	return trx
 }

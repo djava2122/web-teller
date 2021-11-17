@@ -94,8 +94,8 @@ func (_ transaction) Update(trx UCetak) error {
 	SET jumlah_cetak = $1
 	WHERE id = $2;`
 
-	ar, err := pg.DB.Exec(sql, trx.Cetak, trx.Id)
-	log.Infof("[%s] Update Table: %v", ar)
+	_, err := pg.DB.Exec(sql, trx.Cetak, trx.Id)
+	//log.Infof("[%s] Update Table: %v", ar)
 
 	if err != nil {
 		log.Errorf("OI OI ERROR :", err)
@@ -109,8 +109,8 @@ func (_ transaction) UpdateMpn(resp, sts, receipt, reff string) error {
 	SET response_code = $1, transaction_status = $2,receipt = $3
 	WHERE reference_number = $4;`
 
-	ar, err := pg.DB.Exec(sql, resp, sts, receipt, reff)
-	log.Infof("[%s] Update Table: %v", ar)
+	_, err := pg.DB.Exec(sql, resp, sts, receipt, reff)
+	//log.Infof("[%s] Update Table: %v", ar)
 
 	if err != nil {
 		log.Errorf("OI OI ERROR :", err)
@@ -128,12 +128,12 @@ func (_ transaction) Save(trx MTransaction) error {
 					$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
 			)`
 
-	ar, err := pg.DB.Exec(sql,
+	_, err := pg.DB.Exec(sql,
 		trx.ReferenceNumber, trx.FeatureId, trx.FeatureCode, trx.FeatureName, trx.ProductId, trx.ProductCode,
 		trx.ProductName, trx.BillerName, trx.TransactionDate, trx.TransactionAmount, trx.Fee, trx.MerchantType, trx.CurrencyCode,
 		trx.CustomerReference, trx.Created, trx.CreatedBy, trx.Updated, trx.UpdatedBy, trx.TransactionStatus, trx.BranchCode,
 		trx.ResponseCode, trx.FeatureGroupName, trx.FeatureGroupCode, trx.SrcAccount, trx.TransactionType, trx.BranchName, trx.Receipt)
-	log.Infof("[%s] Insert Table: %v", ar)
+	//log.Infof("[%s] Insert Table: %v", ar)
 
 	if err != nil {
 		log.Errorf("OI OI ERROR :", err)
@@ -187,7 +187,7 @@ func (_ transaction) Filter(teller string, cabang string) (result []MTransaction
 		}
 		result = append(result, datas)
 	}
-	log.Infof("Result Report : %s", result)
+	//log.Infof("Result Report : %s", result)
 	return
 }
 
@@ -202,12 +202,12 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 		query.WriteString(fmt.Sprintf(" and  transaction_date between '%s' and '%s'", tglAwal, tglAkhir))
 	}
 	query.WriteString(" ORDER BY created DESC")
-	log.Infof("Query :", query.String())
+	//log.Infof("Query :", query.String())
 	rows, err := pg.DB.Query(query.String())
 	if err != nil {
 		return nil, err
 	}
-	log.Infof("Test query:", rows)
+	//log.Infof("Test query:", rows)
 	for rows.Next() {
 		datas := GetReceipt{}
 		var tampung string
@@ -242,8 +242,8 @@ func (_ transaction) GetTransactionReceipt(reffNumber string) (result interface{
 	var tampung string
 	err := pg.DB.QueryRow(sql, reffNumber).Scan(&tampung)
 	json.Unmarshal([]byte(tampung), &o)
-	log.Infof("Select receip: %v", o)
-	log.Infof("Select tampung: %v", tampung)
+	//log.Infof("Select receip: %v", o)
+	//log.Infof("Select tampung: %v", tampung)
 
 	if err == nil {
 		return &o
@@ -255,7 +255,7 @@ func (_ transaction) GetBranch(reffNumber string) (code, name, trxType, src stri
 	sql := "select branch_code,branch_name, trx_type, src_account from t_transaction where reference_number = $1"
 
 	err = pg.DB.QueryRow(sql, reffNumber).Scan(&code, &name, &trxType, &src)
-	log.Infof("Select receip: ", err)
+	//log.Infof("Select receip: ", err)
 
 	if err == nil {
 		return code, name, trxType, src, err

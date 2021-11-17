@@ -93,9 +93,9 @@ func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 	} else {
 		sql = "select isomsg -> '18' as termType, isomsg -> '41' as termID, trrfnm, trrspc, concat(rtdate ,' ', isomsg -> '12') as trxDate,fields-> 'bookDate' as bookDate, fields -> 'ntb' as ntb , isomsg -> '11' as stan, fields -> 'customerId' as customerReference, fields -> 'payerID' as payerId, fields -> 'payerName'as payerName, cast(isomsg -> '4' as float)/100 as amount, fields -> 'currencyCode' as currencyCode, fields -> 'documentType' as documentType, fields -> 'documentNumber' as documentNumber, fields -> 'documentDate' as documentDate, fields -> 'kppbcCode'as kppbcCode, fields -> 'ntpn' as ntpn from mgate.t_transaction where rtdate between $1 and $2 and (trrfnm = $3 or fields -> 'customerId' = $4) and trftcd = 'MPN2' and (trrspc = '00' or trrspc = '06' or trrspc = '90' or trrspc = '92' or trrspc = 'AW') and mclass != 'R'"
 	}
-	log.Infof("query : ", sql)
+	//log.Infof("query : ", sql)
 	rows, _ := db.Query(sql, startDate, endDate, req, req)
-	log.Infof("Test : ", rows)
+	//log.Infof("Test : ", rows)
 	for rows.Next() {
 		dt := GetMgateStruct{}
 		if jenis <= 3 {
@@ -169,7 +169,7 @@ func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 		var name string
 		var trxType string
 		var src string
-		log.Infof("log quiry mgate 1 :", dt)
+		//log.Infof("log quiry mgate 1 :", dt)
 		if dt.TermType.String == "6010" {
 			code, name, trxType, src, _ = repo.Transaction.GetBranch(dt.TxRefNumber)
 			log.Infof("update table teller :", name)
@@ -228,9 +228,9 @@ func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 					"orgDateTime":        Rdt.Datetime.String,
 					"orgReferenceNumber": Rdt.TxRefNumber,
 				}
-				log.Infof("ddd ", reqParams)
+				//log.Infof("ddd ", reqParams)
 				gateMsg := transport.SendToGate("gate.shared", "27", reqParams)
-				log.Infof("Gate send response:  ", gateMsg)
+				//log.Infof("Gate send response:  ", gateMsg)
 
 				if gateMsg.ResponseCode == "00" {
 					status = "SUCCESS"
@@ -242,7 +242,7 @@ func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 				} else {
 					status = "PENDING"
 				}
-				log.Infof("Reinquiry Mgate rc timeout :", gateMsg)
+				//log.Infof("Reinquiry Mgate rc timeout :", gateMsg)
 				if gateMsg.ResponseCode == "00" {
 					resp.Receipt = gateMsg.Data
 					gateMsg.Data["featureCode"] = dt.FeatureCode
@@ -326,7 +326,7 @@ func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 					}
 				}
 				result = append(result, resp)
-				log.Infof("result : ", result)
+				//log.Infof("result : ", result)
 				return result, err
 			}
 
@@ -368,7 +368,7 @@ func InitDb(req, startDate, endDate string) (result []RespReceipt, err error) {
 			"srcAccount":        src,
 			"txStatus":          status,
 		}
-		log.Infof("Log Respon Mgate: ", resp)
+		//log.Infof("Log Respon Mgate: ", resp)
 		result = append(result, resp)
 		if err != nil {
 			return result, err

@@ -120,9 +120,9 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	if req.Params["featureCode"] == "319" || req.Params["featureCode"] == "303" {
 		Params["srcAccType"] = "00"
 	}
-	log.Infof("send Data to Get: ", Params)
+	//log.Infof("send Data to Get: ", Params)
 	gateMsg := transport.SendToGate("gate.shared", typeTamp, Params)
-	log.Infof("LOG Get :", gateMsg)
+	//log.Infof("LOG Get :", gateMsg)
 	if gateMsg.ResponseCode == "00" {
 
 		switch txType {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
@@ -51,7 +52,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 		} else {
 			ftBol = true
 		}
-		log.Infof("log feature: ", val.FeatureCode, val.FeatureGroupCode)
+		//log.Infof("log feature: ", val.FeatureCode, val.FeatureGroupCode)
 		if ftBol == true {
 			if val.InquiryData == "" {
 				res.Response, _ = json.Marshal(newResponse("02", "invalid inquiry data"))
@@ -67,7 +68,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					res.Response, _ = json.Marshal(newResponse("02", "invalid inquiry data"))
 					return nil
 				}
-				log.Infof("inquiry data: %v", inqDataObj)
+				//log.Infof("inquiry data: %v", inqDataObj)
 			}
 		}
 		var srcAccount string
@@ -81,7 +82,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				srcAccount = "1000000000"
 			}
 		} else {
-			srcAccount = val.SrcAccount
+			srcAccount = strings.TrimSpace(val.SrcAccount)
 		}
 
 		if val.FeatureCode == "103" {
@@ -241,7 +242,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			if params["fee"] == "0" {
 				params["fee"] = ""
 			}
-			log.Infof("Request-ID:[%s] param Send to Gate: %v", req.Headers["Request-ID"], params)
+			//log.Infof("Request-ID:[%s] param Send to Gate: %v", req.Headers["Request-ID"], params)
 			if val.FeatureCode == "404" {
 				gateMsg = transport.SendToGate("gate.shared", "26", params)
 			} else {
@@ -268,7 +269,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 		tampungData["ntb"] = params["referenceNumber"]
 		tampungData["stan"] = stan[0:6]
 
-		log.Infof("['%s'] Response Gate: %v", req.Headers["Request-ID"], gateMsg)
+		//log.Infof("['%s'] Response Gate: %v", req.Headers["Request-ID"], gateMsg)
 		if gateMsg.ResponseCode == "00" {
 			if val.FeatureCode == "319" || val.FeatureCode == "303" {
 				if val.Txtype == "03" {
@@ -292,7 +293,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 					var shaAkhir string
 					var periodPaid string
 					for index, tag := range tagihan {
-						log.Infof("tagihan : ", tag)
+						//log.Infof("tagihan : ", tag)
 						mapTag := tag.(map[string]interface{})
 						if len(tagihan) == 1 {
 							slaAwal = mapTag["slalwbp1"].(string)
@@ -384,7 +385,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			gateMsg.Data["transactionType"] = val.TransactionType
 			gateMsg.Data["txType"] = val.Txtype
 			dataReceipt, _ := json.Marshal(gateMsg.Data)
-			log.Infof("Data test Response:", dataReceipt)
+			//log.Infof("Data test Response:", dataReceipt)
 			newDataTrx = append(newDataTrx, gateMsg.Data)
 			// res.Response, _ = json.Marshal(successResp(gateMsg.Data))
 			params["featureGroupCode"] = val.FeatureGroupCode
@@ -421,7 +422,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				}
 				gateMsg.Data = rec
 
-				log.Infof("Data Tampung: ", gateMsg.Data)
+				//log.Infof("Data Tampung: ", gateMsg.Data)
 			}
 			mpnPending := false
 			if val.FeatureCode == "404" {
@@ -463,7 +464,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				sts = "FAILED"
 			}
 
-			log.Infof("data gateData: ", gateMsg.Data)
+			//log.Infof("data gateData: ", gateMsg.Data)
 			tampungData["customerReference"] = val.CustomerReference
 			tampungData["txStatus"] = sts
 			tampungData["bookDate"] = bookDate
@@ -476,7 +477,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			data, _ := json.Marshal(tampungData)
 			if val.FeatureCode == "404" && gateMsg.ResponseCode == "M4" {
 				gateMsg.Data = tampungData
-				log.Infof("gate Date M4 :", gateMsg)
+				//log.Infof("gate Date M4 :", gateMsg)
 				gateMsg.Data["txDate"] = params["dateTime"]
 				gateMsg.Data["customerReference"] = val.CustomerReference
 				gateMsg.Data["featureName"] = val.FeatureName
