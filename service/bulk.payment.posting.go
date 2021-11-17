@@ -197,19 +197,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 				}
 			}
 			if val.FeatureCode == "404" && core == "S" {
-				params = map[string]string{
-					"tellerID":        req.Params["tellerID"],
-					"tellerPass":      req.Params["tellerPass"],
-					"amount":          val.Amount,
-					"txType":          val.Txtype,
-					"srcAccount":      srcAccount,
-					"customerId":      val.CustomerReference,
-					"inqData":         val.InquiryData,
-					"referenceNumber": util.RandomNumber(12),
-					"termType":        "6010",
-					"termId":          "KWTELLER",
-					"dateTime":        txDate.Format("20060102150405"),
-				}
+				params["termId"] = "KWTELLER"
 			}
 			if val.FeatureCode == "404" {
 				params["srcAccount"] = srcAccount
