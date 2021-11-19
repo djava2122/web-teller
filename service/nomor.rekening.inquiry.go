@@ -427,7 +427,7 @@ func (h *WebTellerHandler) InquiryNomorRekening(ctx context.Context, req *wtprot
 			}
 		}
 		log.Infof("[%s] response Code: %s", req.Headers["Request-ID"], receipt[0].Receipt["responseCode"])
-		log.Infof("[%s] request: %s", req.Headers["Request-ID"], receipt)
+		//log.Infof("[%s] request: %s", req.Headers["Request-ID"], receipt)
 		if receipt != nil {
 			res.Response, _ = json.Marshal(successResp(receipt))
 		} else {

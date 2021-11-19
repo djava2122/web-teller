@@ -146,6 +146,5 @@ func BuildDataTransaction(data map[string]string, params map[string]string, stat
 	trx.SrcAccount = params["srcAccount"]
 	trx.ResponseCode = code
 	trx.Receipt = params["receipt"]
-	log.Infof("asasaaasas:", trx)
 	return trx
 }

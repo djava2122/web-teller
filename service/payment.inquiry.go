@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"strconv"
+	"strings"
 	"time"
 
 	"gitlab.pactindo.com/ebanking/common/log"
@@ -104,7 +105,7 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	} else if req.Params["srcAccount"] == "" && req.Params["core"] == "S" {
 		Params["srcAccount"] = "6000000000"
 	} else {
-		Params["srcAccount"] = req.Params["srcAccount"]
+		Params["srcAccount"] = strings.TrimSpace(req.Params["srcAccount"])
 	}
 	typeTamp := txType
 	if req.Params["featureCode"] == "404" {
