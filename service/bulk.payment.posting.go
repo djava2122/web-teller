@@ -45,6 +45,20 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 
 	for _, val := range newBulkPayment {
 
+		//TODO: INI BUAT INQURY KE TABLE TRANSACTION
+		//if val.FeatureCode == "404" || val.FeatureCode == "303" {
+		//	customerRef, trxStatus, err := repo.Transaction.FindTransaction(val.CustomerReference)
+		//	if err != nil {
+		//		return err
+		//	}
+		//	if strings.EqualFold(val.CustomerReference, customerRef) {
+		//		if trxStatus == "SUCCESS" || trxStatus == "PENDING" {
+		//			res.Response, _ = json.Marshal(newResponse("99", "Invalid Duplicate Transaction"))
+		//			return nil
+		//		}
+		//	}
+		//}
+
 		var inqDataObj *fastjson.Object
 		ftBol := false
 		if val.FeatureCode == "404" || val.FeatureCode == "103" || val.FeatureCode == "315" || val.FeatureGroupCode == "002" || val.FeatureCode == "301" || val.FeatureCode == "311" || val.FeatureCode == "319" || val.FeatureCode == "303" {
@@ -198,6 +212,7 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 			}
 			if val.FeatureCode == "404" && core == "S" {
 				params["termId"] = "KWTELLER"
+
 			}
 			if val.FeatureCode == "404" {
 				params["srcAccount"] = srcAccount

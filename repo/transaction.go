@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/pg"
 )
@@ -262,6 +261,20 @@ func (_ transaction) GetBranch(reffNumber string) (code, name, trxType, src stri
 	}
 
 	return code, name, trxType, src, err
+}
+
+func (_ transaction) FindTransaction(custRef string) (string, string, error) {
+	var customerRef, trxStatus string
+	stmt, err := pg.DB.Prepare("SELECT customer_reference, transaction_status FROM t_transaction WHERE customer_reference=$1")
+	if err != nil {
+		return "", "", err
+	}
+	defer stmt.Close()
+	err = stmt.QueryRow(custRef).Scan(&customerRef, &trxStatus)
+	if err != nil {
+		return "", "", err
+	}
+	return customerRef, trxStatus, nil
 }
 
 var Transaction transaction

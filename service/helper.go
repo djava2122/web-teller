@@ -8,7 +8,8 @@ func FormattedTime(date string, formatted string) string {
 }
 
 func ParseRoleTeller(data string) string {
-	if data == "?FDS.MENU.MAIN.TELLER" || data == "?KALSEL.MENU.MAIN.TELLER" || data == "?KALSEL.SYA.MENU.TEL" || data == "?KALSEL.SYA.MENU.TELSKN" || data == "?KALSEL.SYA.MENU.TELKFS" {
+	if data == "?FDS.MENU.MAIN.TELLER" || data == "?KALSEL.MENU.MAIN.TELLER" || data == "?KALSEL.SYA.MENU.TEL" || data == "?KALSEL.SYA.MENU.TELSKN" || data == "?KALSEL.SYA.MENU.TELKFS" ||
+		data == "?KALSEL.MENU.MAIN.TELLERWEEKEND" {
 		return "T"
 	} else if data == "?FDS.MENU.HEAD.TELLER" || data == "?KALSEL.MENU.MAIN.HT" || data == "?KALSEL.SYA.HTEL" || data == "?KALSEL.SYA.MENU.HTELSKN" || data == "?KALSEL.MENU.MAIN.KBCS" {
 		return "H"
@@ -17,9 +18,9 @@ func ParseRoleTeller(data string) string {
 		data == "?KALSEL.SYA.MENU.BOSKN" || data == "?KALSEL.SYA.MENU.KTKP" || data == "?KALSEL.MENU.BO.KP.PEJABAT" || data == "?KALSEL.MENU.MAIN.BO.KP.STAF" ||
 		data == "?KALSEL.SYA.MENU.TKP" || data == "?KALSEL.SYA.MENU.TELKFS" {
 		return "B"
-	} else if data == "?KALSEL.SYA.CS" {
+	} else if data == "?KALSEL.SYA.MENU.CS" || data == "?KALSEL.SYA.CS" {
 		return "CS"
-	} else if data == " " || data == "?KALSEL.MENU.MAIN.DIVISI"{
+	} else if data == "" || data == "?KALSEL.MENU.MAIN.DIVISI"{
 		return "I"
 	} else {
 		return "A"
