@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
 	"gitlab.pactindo.com/ebanking/common/log"
 	"gitlab.pactindo.com/ebanking/common/pg"
 )
@@ -191,7 +192,7 @@ func (_ transaction) Filter(teller string, cabang string) (result []MTransaction
 }
 
 func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceipt, err error) {
-	query := bytes.NewBufferString("select id, branch_code, branch_name, trx_type, src_account, receipt, jumlah_cetak, response_code from t_transaction")
+	query := bytes.NewBufferString("select id, branch_code, branch_name, trx_type, src_account, receipt, jumlah_cetak, response_code, createdby from t_transaction")
 	if teller != "" {
 		query.WriteString(fmt.Sprintf(" WHERE (reference_number = '%s' or customer_reference = '%s') and (response_code = '00' or response_code = '06')", teller, teller))
 	}
@@ -210,6 +211,7 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 	for rows.Next() {
 		datas := GetReceipt{}
 		var tampung string
+		var createdBy string
 		err := rows.Scan(
 			&datas.Id,
 			&datas.BranchCode,
@@ -219,12 +221,14 @@ func (_ transaction) GetTrxCustom(teller, start, end string) (result []GetReceip
 			&tampung,
 			&datas.JumlahCetak,
 			&datas.ResponseCode,
+			&createdBy,
 		)
 		json.Unmarshal([]byte(tampung), &datas.Receipt)
 		datas.Receipt["branchName"] = datas.BranchName
 		datas.Receipt["transactionType"] = datas.TransactionType
 		datas.Receipt["srcAccount"] = datas.SrcAccount
 		datas.Receipt["responseCode"] = datas.ResponseCode
+		datas.Receipt["createdBy"] = createdBy
 		if err != nil {
 			return nil, err
 		}
