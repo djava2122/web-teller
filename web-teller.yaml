@@ -45,6 +45,8 @@ spec:
           volumeMounts:
             - name: app-dir
               mountPath: /app
+            - name: file-dir
+                mountPath: /file
             - name: tz-config
               mountPath: /etc/localtime
           ports:
@@ -55,6 +57,10 @@ spec:
           hostPath:
             path: /opt/web-teller
             type: DirectoryOrCreate
+        - name: file-dir
+            hostPath:
+              path: /opt/web-teller/file
+              type: DirectoryOrCreate
         - name: tz-config
           hostPath:
             path: /usr/share/zoneinfo/Asia/Manila

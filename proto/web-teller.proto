@@ -32,4 +32,6 @@ service WebTeller {
     rpc ReportMpnAll (APIREQ) returns (APIRES);
     rpc LoginSiskopatuh (APIREQ) returns (APIRES);
     rpc GetBranchTeller (APIREQ) returns (APIRES);
+    rpc DownloadFileReport (APIREQ) returns (APIRES);
+    rpc GenerateFileReport (APIREQ) returns (APIRES);
 }

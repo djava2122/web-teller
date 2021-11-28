@@ -143,7 +143,7 @@ func (_ transaction) Save(trx MTransaction) error {
 	return nil
 }
 
-func (_ transaction) Filter(teller string, cabang string) (result []MTransaction, err error) {
+func (_ transaction) Filter(teller string, cabang string) (result []TransactionReport, err error) {
 	query := bytes.NewBufferString("select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code,branch_name, trx_type, src_account, response_code from t_transaction ")
 	if teller != "" && cabang == "" {
 		query.WriteString(fmt.Sprintf(" WHERE createdby = '%s'", teller))
@@ -159,7 +159,7 @@ func (_ transaction) Filter(teller string, cabang string) (result []MTransaction
 	}
 
 	for rows.Next() {
-		datas := MTransaction{}
+		datas := TransactionReport{}
 		err := rows.Scan(
 			&datas.FeatureName,
 			&datas.FeatureCode,
@@ -279,6 +279,94 @@ func (_ transaction) FindTransaction(custRef string) (string, string, error) {
 		return "", "", err
 	}
 	return customerRef, trxStatus, nil
+}
+
+func (_ transaction) TransactionReport(filter string) (result []TransactionReport, err error) {
+	queryGetTransaction := "select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code,branch_name, trx_type, src_account, response_code from t_transaction "
+	rows, err := pg.DB.Query(fmt.Sprintf("%v %v", queryGetTransaction, filter))
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		datas := TransactionReport{}
+		err := rows.Scan(
+			&datas.FeatureName,
+			&datas.FeatureCode,
+			&datas.FeatureGroupCode,
+			&datas.FeatureGroupName,
+			&datas.TransactionDate,
+			&datas.TransactionAmount,
+			&datas.Fee,
+			&datas.TransactionStatus,
+			&datas.ReferenceNumber,
+			&datas.CustomerReference,
+			&datas.CurrencyCode,
+			&datas.CreatedBy,
+			&datas.BranchCode,
+			&datas.BranchName,
+			&datas.TransactionType,
+			&datas.SrcAccount,
+			&datas.ResponseCode,
+		)
+		if datas.TransactionType == "TUNAI" {
+			datas.SrcAccount = "-"
+		}
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, datas)
+	}
+	return
+}
+
+func (_ transaction) FilterTransaction(filter string, page, pageSize int) (result []TransactionReport, rowCount int, err error) {
+	queryGetTransaction := "select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code,branch_name, trx_type, src_account, response_code from t_transaction "
+	rows, err := pg.DB.Query(fmt.Sprintf("%v %v LIMIT %v OFFSET %v", queryGetTransaction, filter, pageSize, (page - 1) * pageSize))
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	queryCountData := "SELECT COUNT(id) FROM t_transaction "
+	err = pg.DB.QueryRow(fmt.Sprintf("%v %v", queryCountData, filter)).Scan(&rowCount)
+	log.Infof(fmt.Sprintf("%v %v", queryCountData, filter))
+	if err != nil {
+		return nil, 0, err
+	}
+
+	for rows.Next() {
+		datas := TransactionReport{}
+		err := rows.Scan(
+			&datas.FeatureName,
+			&datas.FeatureCode,
+			&datas.FeatureGroupCode,
+			&datas.FeatureGroupName,
+			&datas.TransactionDate,
+			&datas.TransactionAmount,
+			&datas.Fee,
+			&datas.TransactionStatus,
+			&datas.ReferenceNumber,
+			&datas.CustomerReference,
+			&datas.CurrencyCode,
+			&datas.CreatedBy,
+			&datas.BranchCode,
+			&datas.BranchName,
+			&datas.TransactionType,
+			&datas.SrcAccount,
+			&datas.ResponseCode,
+		)
+		if datas.TransactionType == "TUNAI" {
+			datas.SrcAccount = "-"
+		}
+		if err != nil {
+			return nil, 0, err
+		}
+		result = append(result, datas)
+	}
+	return
 }
 
 var Transaction transaction

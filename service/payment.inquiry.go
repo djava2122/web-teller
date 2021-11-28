@@ -59,12 +59,24 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	}
 	log.Infof("[%s] request branch: %v", req.Headers["Request-ID"], req.Params["branchCode"])
 	var substring string
-	if req.Params["featureCode"] == "404" {
-		branch := req.Params["branchCode"]
-		substring = branch[3:9]
+
+	if strings.EqualFold(req.Params["branchCode"], "ALL") {
+		substring = "010001"
 	} else {
-		substring = req.Params["branchCode"]
+		if req.Params["featureCode"] == "404" {
+			branch := req.Params["branchCode"]
+			substring = branch[3:9]
+		} else {
+			substring = req.Params["branchCode"]
+		}
 	}
+
+	//if req.Params["featureCode"] == "404" {
+	//	branch := req.Params["branchCode"]
+	//	substring = branch[3:9]
+	//} else {
+	//	substring = req.Params["branchCode"]
+	//}
 
 	// TODO: INI BUAT WHITELIST KODE CABANG
 	//if req.Params["featureName"] == "MPN" {

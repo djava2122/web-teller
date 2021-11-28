@@ -215,10 +215,14 @@ func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.AP
 
 			}
 			if val.FeatureCode == "404" {
-				params["srcAccount"] = srcAccount
-				branch := req.Params["branchCode"]
-				substring := branch[3:9]
-				params["branchCode"] = substring
+				if strings.EqualFold(req.Params["branchCode"], "ALL") {
+					params["branchCode"] = "010001"
+				} else {
+					params["srcAccount"] = srcAccount
+					branch := req.Params["branchCode"]
+					substring := branch[3:9]
+					params["branchCode"] = substring
+				}
 			}
 
 			if val.FeatureCode == "302" {

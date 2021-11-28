@@ -50,6 +50,8 @@ type WebTellerService interface {
 	ReportMpnAll(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	LoginSiskopatuh(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	GetBranchTeller(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
+	DownloadFileReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
+	GenerateFileReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 }
 
 type webTellerService struct {
@@ -230,6 +232,26 @@ func (c *webTellerService) GetBranchTeller(ctx context.Context, in *APIREQ, opts
 	return out, nil
 }
 
+func (c *webTellerService) DownloadFileReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error) {
+	req := c.c.NewRequest(c.name, "WebTeller.DownloadFileReport", in)
+	out := new(APIRES)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *webTellerService) GenerateFileReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error) {
+	req := c.c.NewRequest(c.name, "WebTeller.GenerateFileReport", in)
+	out := new(APIRES)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for WebTeller service
 
 type WebTellerHandler interface {
@@ -249,6 +271,8 @@ type WebTellerHandler interface {
 	ReportMpnAll(context.Context, *APIREQ, *APIRES) error
 	LoginSiskopatuh(context.Context, *APIREQ, *APIRES) error
 	GetBranchTeller(context.Context, *APIREQ, *APIRES) error
+	DownloadFileReport(context.Context, *APIREQ, *APIRES) error
+	GenerateFileReport(context.Context, *APIREQ, *APIRES) error
 }
 
 func RegisterWebTellerHandler(s server.Server, hdlr WebTellerHandler, opts ...server.HandlerOption) error {
@@ -269,6 +293,8 @@ func RegisterWebTellerHandler(s server.Server, hdlr WebTellerHandler, opts ...se
 		ReportMpnAll(ctx context.Context, in *APIREQ, out *APIRES) error
 		LoginSiskopatuh(ctx context.Context, in *APIREQ, out *APIRES) error
 		GetBranchTeller(ctx context.Context, in *APIREQ, out *APIRES) error
+		DownloadFileReport(ctx context.Context, in *APIREQ, out *APIRES) error
+		GenerateFileReport(ctx context.Context, in *APIREQ, out *APIRES) error
 	}
 	type WebTeller struct {
 		webTeller
@@ -343,4 +369,12 @@ func (h *webTellerHandler) LoginSiskopatuh(ctx context.Context, in *APIREQ, out 
 
 func (h *webTellerHandler) GetBranchTeller(ctx context.Context, in *APIREQ, out *APIRES) error {
 	return h.WebTellerHandler.GetBranchTeller(ctx, in, out)
+}
+
+func (h *webTellerHandler) DownloadFileReport(ctx context.Context, in *APIREQ, out *APIRES) error {
+	return h.WebTellerHandler.DownloadFileReport(ctx, in, out)
+}
+
+func (h *webTellerHandler) GenerateFileReport(ctx context.Context, in *APIREQ, out *APIRES) error {
+	return h.WebTellerHandler.GenerateFileReport(ctx, in, out)
 }
