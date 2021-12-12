@@ -79,7 +79,7 @@ func (h *WebTellerHandler) TransactionReport(ctx context.Context, req *wtproto.A
 	}
 
 	if len(data) != 0 {
-		res.Response, _ = json.Marshal(SuccessWithPadding(dataCount, page, pageSize, data))
+		res.Response, _ = json.Marshal(SuccessWithPadding(dataCount, page, pageSize, ConvertStructTransactionToResult(data)))
 	} else {
 		res.Response, _ = json.Marshal(newResponse("80", "Data Not Found"))
 	}
@@ -159,12 +159,12 @@ func (h *WebTellerHandler) DownloadFileReport(ctx context.Context, req *wtproto.
 	return nil
 }
 
-func ConvertStructTransactionToResult(transaction []repo.MTransaction) []*repo.TransactionReport {
+func ConvertStructTransactionToResult(transaction []repo.TransactionReport) []*repo.TransactionReport {
 	var result []*repo.TransactionReport
 	for _, val := range transaction {
 		data := repo.TransactionReport{}
 		data.FeatureName = val.FeatureName
-		data.FeatureCode = strconv.Itoa(val.FeatureCode)
+		data.FeatureCode = val.FeatureCode
 		data.FeatureGroupCode = val.FeatureGroupCode
 		data.FeatureGroupName = val.FeatureGroupName
 		data.TransactionDate = FormattedTime(val.TransactionDate, "2006-01-02 15:04:05")
@@ -198,6 +198,9 @@ func parseParamsToMapString(filter *Filter) []string {
 	}
 	if len(filter.StartDate) > 0 && len(filter.EndDate) > 0 {
 		filterString = append(filterString, fmt.Sprintf("transaction_date between '%s 00:00:00' and '%s 23:59:59'", filter.StartDate, filter.EndDate))
+	}
+	if len(filter.Status) > 0 {
+		filterString = append(filterString, fmt.Sprintf("transaction_status = '%v'", filter.Status))
 	}
 	return filterString
 }

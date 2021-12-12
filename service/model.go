@@ -71,4 +71,5 @@ type Filter struct {
 	Branch      string `json:"branch"`
 	StartDate   string `json:"startDate"`
 	EndDate     string `json:"endDate"`
+	Status		string `json:"status"`
 }
