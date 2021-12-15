@@ -26,6 +26,7 @@ func main() {
 			"URL_MGATE",
 			"USER_SIKOPATUH",
 			"PASS_SIKOPATUH",
+			"FILE_LOCATION",
 		),
 		micro.RequestTimeout(time.Second*137),
 	)
@@ -41,6 +42,7 @@ func main() {
 	dbURL := conf["DB_URL"]
 
 	log.InfoS("DB_URL: " + dbURL)
+	log.InfoS("FILE_LOCATION: " + conf["FILE_LOCATION"])
 
 	pg.Init(conf["DB_URL"], 0)
 

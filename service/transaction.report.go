@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/micro"
 	eb_response "gitlab.pactindo.com/ebanking/common/response"
 	"gitlab.pactindo.com/ebanking/common/trycatch"
 	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
@@ -139,7 +140,8 @@ func (h *WebTellerHandler) DownloadFileReport(ctx context.Context, req *wtproto.
 		res.Response, _ = json.Marshal(newResponse("99", "Internal Server Error"))
 	})
 
-	file, err := os.Open("/file/" + req.Params["filename"])
+	conf := micro.GetConfig()
+	file, err := os.Open(conf["FILE_LOCATION"] + req.Params["filename"])
 	if file != nil {
 		defer file.Close()
 	}
@@ -153,7 +155,7 @@ func (h *WebTellerHandler) DownloadFileReport(ctx context.Context, req *wtproto.
 	header := map[string]string{}
 	header["Content-Disposition"] = "attachment; filename= " + req.Params["filename"]
 	//data := make([]byte, 1024)
-	bFile, _:= ioutil.ReadFile("/file/" + req.Params["filename"])
+	bFile, _:= ioutil.ReadFile(conf["FILE_LOCATION"] + req.Params["filename"])
 	res.Response = bFile
 	res.Headers = header
 	return nil

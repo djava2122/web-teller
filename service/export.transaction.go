@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/csv"
 	"gitlab.pactindo.com/ebanking/common/log"
+	"gitlab.pactindo.com/ebanking/common/micro"
 	"gitlab.pactindo.com/ebanking/common/util"
 	"gitlab.pactindo.com/ebanking/web-teller/repo"
 	"os"
@@ -10,9 +11,10 @@ import (
 )
 
 func ExportTransaction(data []repo.TransactionReport) (bool, string, error) {
+	conf := micro.GetConfig()
 	rand := util.RandomNumber(4)
 	nameFiles := "file-"+rand+".csv"
-	file, err := os.Create("/file/" + nameFiles)
+	file, err := os.Create(conf["FILE_LOCATION"] + nameFiles)
 	if err != nil {
 		log.Errorf("Cannot create file", err)
 	}
