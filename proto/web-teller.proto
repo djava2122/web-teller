@@ -34,4 +34,5 @@ service WebTeller {
     rpc GetBranchTeller (APIREQ) returns (APIRES);
     rpc DownloadFileReport (APIREQ) returns (APIRES);
     rpc GenerateFileReport (APIREQ) returns (APIRES);
+    rpc InquiryPackages (APIREQ) returns (APIRES);
 }

@@ -52,6 +52,7 @@ type WebTellerService interface {
 	GetBranchTeller(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	DownloadFileReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 	GenerateFileReport(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
+	InquiryPackages(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error)
 }
 
 type webTellerService struct {
@@ -252,6 +253,16 @@ func (c *webTellerService) GenerateFileReport(ctx context.Context, in *APIREQ, o
 	return out, nil
 }
 
+func (c *webTellerService) InquiryPackages(ctx context.Context, in *APIREQ, opts ...client.CallOption) (*APIRES, error) {
+	req := c.c.NewRequest(c.name, "WebTeller.InquiryPackages", in)
+	out := new(APIRES)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for WebTeller service
 
 type WebTellerHandler interface {
@@ -273,6 +284,7 @@ type WebTellerHandler interface {
 	GetBranchTeller(context.Context, *APIREQ, *APIRES) error
 	DownloadFileReport(context.Context, *APIREQ, *APIRES) error
 	GenerateFileReport(context.Context, *APIREQ, *APIRES) error
+	InquiryPackages(context.Context, *APIREQ, *APIRES) error
 }
 
 func RegisterWebTellerHandler(s server.Server, hdlr WebTellerHandler, opts ...server.HandlerOption) error {
@@ -295,6 +307,7 @@ func RegisterWebTellerHandler(s server.Server, hdlr WebTellerHandler, opts ...se
 		GetBranchTeller(ctx context.Context, in *APIREQ, out *APIRES) error
 		DownloadFileReport(ctx context.Context, in *APIREQ, out *APIRES) error
 		GenerateFileReport(ctx context.Context, in *APIREQ, out *APIRES) error
+		InquiryPackages(ctx context.Context, in *APIREQ, out *APIRES) error
 	}
 	type WebTeller struct {
 		webTeller
@@ -377,4 +390,8 @@ func (h *webTellerHandler) DownloadFileReport(ctx context.Context, in *APIREQ, o
 
 func (h *webTellerHandler) GenerateFileReport(ctx context.Context, in *APIREQ, out *APIRES) error {
 	return h.WebTellerHandler.GenerateFileReport(ctx, in, out)
+}
+
+func (h *webTellerHandler) InquiryPackages(ctx context.Context, in *APIREQ, out *APIRES) error {
+	return h.WebTellerHandler.InquiryPackages(ctx, in, out)
 }
