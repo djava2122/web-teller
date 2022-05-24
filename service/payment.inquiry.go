@@ -87,6 +87,23 @@ func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIR
 	//	}
 	//}
 
+	// TODO: HARDCODE FEE
+	if req.Params["featureCode"] == "201" && req.Params["billerCode"] == "TSEL" {
+		fee = 1500
+	}
+	if req.Params["featureCode"] == "201" && req.Params["billerCode"] == "ISAT" {
+		fee = 1500
+	}
+	if req.Params["featureCode"] == "201" && req.Params["billerCode"] == "SMRT" {
+		fee = 2500
+	}
+	if req.Params["featureCode"] == "203" && req.Params["billerCode"] == "TSEL" {
+		fee = 1500
+	}
+	if req.Params["featureCode"] == "301" && req.Params["billerCode"] == "SMRT" {
+		fee = 2500
+	}
+
 	numbBill := ""
 	txFee := ""
 	if req.Params["featureCode"] == "319" {

@@ -5,9 +5,14 @@ metadata:
   name: web-teller-config
 data:
   DB_URL: "host=172.19.252.114 user=ebanking password=ebanking dbname=web-teller sslmode=disable"
-  REDIS_URL: "redis://172.19.252.114:6379/0"
+  REDIS_URL: "redis://ebanking:P@ssw0rd123$@172.19.252.114:6379/0"
   REDIS_POOLSIZE: ""
   GATEWAY_TIMEOUT: "90"
+  URL_SIKOPATUH: "http://172.19.252.114:8161/api-dev/umrah/bank/login"
+  URL_MGATE: "postgres://mgate:mgate2020@172.19.252.114/micro-gate?sslmode=disable"
+  USER_SIKOPATUH: "122"
+  PASS_SIKOPATUH: "BPDKALSEL2021"
+  FILE_LOCATION: ""
 ---
 
 apiVersion: apps/v1

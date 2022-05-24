@@ -1,6 +1,9 @@
 package service
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 func FormattedTime(date string, formatted string) string {
 	t, _ := time.Parse(time.RFC3339, date)
@@ -20,7 +23,7 @@ func ParseRoleTeller(data string) string {
 		return "B"
 	} else if data == "?KALSEL.SYA.MENU.CS" || data == "?KALSEL.SYA.CS" {
 		return "CS"
-	} else if data == "" || data == "?KALSEL.MENU.MAIN.DIVISI"{
+	} else if data == "" || data == "?KALSEL.MENU.MAIN.DIVISI" {
 		return "I"
 	} else {
 		return "A"
@@ -32,4 +35,9 @@ func ParseRC(rc string) string {
 		return "Tanggal Pembayaran Virtual Account telah Berakhir"
 	}
 	return "Undefined Error"
+}
+
+func ParseBranchCode(data string) string {
+	branchCode := strings.ReplaceAll(data, " ", "")
+	return branchCode[0:9]
 }

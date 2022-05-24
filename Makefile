@@ -2,7 +2,6 @@ BINARY := web-teller
 BUILDCMD := go build -trimpath -ldflags="-s -w" -o
 OUTPUTDIR := build
 OUTPUT := ./$(OUTPUTDIR)/$(BINARY)
-tag := 1.1
 TIME := $(shell date +%Y%m%d)
 PATHNEXUS := ebanking/ibmb
 
@@ -16,7 +15,7 @@ linux:
 
 .PHONY: docker
 docker:
-	docker build -t $(BINARY):${tag}.$(TIME) .
-	docker tag $(BINARY):${tag}.$(TIME) nexus.pactindo.com:8443/${PATHNEXUS}/$(BINARY):${tag}.$(TIME)
-	docker push nexus.pactindo.com:8443/${PATHNEXUS}/$(BINARY):${tag}.$(TIME)
+	docker build -t $(BINARY):${tag} .
+	docker tag $(BINARY):${tag} nexus.pactindo.com:8443/${PATHNEXUS}/$(BINARY):${tag}
+	docker push nexus.pactindo.com:8443/${PATHNEXUS}/$(BINARY):${tag}
 
