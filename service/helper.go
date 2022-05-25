@@ -38,6 +38,9 @@ func ParseRC(rc string) string {
 }
 
 func ParseBranchCode(data string) string {
+	if strings.EqualFold(strings.TrimSpace(data), "ALL") {
+		return data
+	}
 	branchCode := strings.ReplaceAll(data, " ", "")
 	return branchCode[0:9]
 }
