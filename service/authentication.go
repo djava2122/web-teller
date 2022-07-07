@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/web-teller/repo"
 	"strings"
 )
 

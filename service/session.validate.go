@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/trycatch"
 
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 )
 
 func (h *WebTellerHandler) SessionValidate(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {

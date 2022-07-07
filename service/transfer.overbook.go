@@ -2,29 +2,26 @@ package service
 
 import (
 	"context"
+	"git.pactindo.com/ebanking/common/constant"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/response"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	cutil "git.pactindo.com/ebanking/common/util"
+	feature_and_product "git.pactindo.com/ebanking/proto-common/feature-and-product"
+	"git.pactindo.com/ebanking/proto-common/fee"
+	feesvc "git.pactindo.com/ebanking/proto-common/fee"
+	csvc "git.pactindo.com/ebanking/proto-ibmb/customer"
+	msg "git.pactindo.com/ebanking/proto-ibmb/eb-message"
+	sysparam "git.pactindo.com/ebanking/proto-ibmb/system-parameter"
+	trxsvc "git.pactindo.com/ebanking/proto-ibmb/transaction"
+	"git.pactindo.com/ebanking/web-teller/model"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/web-teller/util"
 	// "encoding/json"
 	"strconv"
 	"strings"
 	"time"
-
-	"gitlab.pactindo.com/ebanking/common/constant"
-	"gitlab.pactindo.com/ebanking/common/response"
-	cutil "gitlab.pactindo.com/ebanking/common/util"
-	feature_and_product "gitlab.pactindo.com/ebanking/proto-common/feature-and-product"
-	"gitlab.pactindo.com/ebanking/proto-common/fee"
-	feesvc "gitlab.pactindo.com/ebanking/proto-common/fee"
-	csvc "gitlab.pactindo.com/ebanking/proto-ibmb/customer"
-	msg "gitlab.pactindo.com/ebanking/proto-ibmb/eb-message"
-	sysparam "gitlab.pactindo.com/ebanking/proto-ibmb/system-parameter"
-	trxsvc "gitlab.pactindo.com/ebanking/proto-ibmb/transaction"
-
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	"gitlab.pactindo.com/ebanking/transfer/model"
-	"gitlab.pactindo.com/ebanking/transfer/util"
-
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
 )
 
 type transferHandler struct {

@@ -3,11 +3,11 @@ package service
 import (
 	"bytes"
 	"context"
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/micro"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/micro"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 	"net/http"
 )
 
@@ -50,7 +50,7 @@ func (h *WebTellerHandler) LoginSiskopatuh(ctx context.Context, req *wtproto.API
 	var data ResSiskopatuh
 
 	postData := map[string]interface{}{
-		"userid": conf["USER_SIKOPATUH"],
+		"userid":   conf["USER_SIKOPATUH"],
 		"password": conf["PASS_SIKOPATUH"],
 	}
 

@@ -5,16 +5,16 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"git.pactindo.com/ebanking/web-teller/repo"
 
 	"github.com/valyala/fastjson"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	"gitlab.pactindo.com/ebanking/common/util"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	"git.pactindo.com/ebanking/common/util"
 
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 )
 
 func (h *WebTellerHandler) PaymentPosting(_ context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {

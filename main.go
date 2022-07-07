@@ -4,14 +4,14 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/micro"
-	"gitlab.pactindo.com/ebanking/common/pg"
-	"gitlab.pactindo.com/ebanking/common/redis"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/micro"
+	"git.pactindo.com/ebanking/common/pg"
+	"git.pactindo.com/ebanking/common/redis"
 
-	"gitlab.pactindo.com/ebanking/web-teller/service"
+	"git.pactindo.com/ebanking/web-teller/service"
 
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 )
 
 func main() {

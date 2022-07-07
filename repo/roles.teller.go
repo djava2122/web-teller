@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"gitlab.pactindo.com/ebanking/common/pg"
+	"git.pactindo.com/ebanking/common/pg"
 )
 
 const FindRole = "SELECT init_role, role FROM m_teller_roles WHERE init_role=$1;"
@@ -19,4 +19,3 @@ func (_ transaction) FindRole(custRef string) (string, string, error) {
 	}
 	return initrole, role, nil
 }
-

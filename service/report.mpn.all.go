@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/micro"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/micro"
+	"git.pactindo.com/ebanking/common/trycatch"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/web-teller/repo"
 )
 
 func (h *WebTellerHandler) ReportMpnAll(_ context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {

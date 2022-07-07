@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/micro"
-	eb_response "gitlab.pactindo.com/ebanking/common/response"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/micro"
+	eb_response "git.pactindo.com/ebanking/common/response"
+	"git.pactindo.com/ebanking/common/trycatch"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/web-teller/repo"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -155,7 +155,7 @@ func (h *WebTellerHandler) DownloadFileReport(ctx context.Context, req *wtproto.
 	header := map[string]string{}
 	header["Content-Disposition"] = "attachment; filename= " + req.Params["filename"]
 	//data := make([]byte, 1024)
-	bFile, _:= ioutil.ReadFile(conf["FILE_LOCATION"] + req.Params["filename"])
+	bFile, _ := ioutil.ReadFile(conf["FILE_LOCATION"] + req.Params["filename"])
 	res.Response = bFile
 	res.Headers = header
 	return nil

@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	"gitlab.pactindo.com/ebanking/common/util"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	"git.pactindo.com/ebanking/common/util"
 
-	pfee "gitlab.pactindo.com/ebanking/proto-common/fee"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	pfee "git.pactindo.com/ebanking/proto-common/fee"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 )
 
 func (h *WebTellerHandler) PaymentInquiry(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {

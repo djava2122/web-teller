@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	"gitlab.pactindo.com/ebanking/common/util"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	"git.pactindo.com/ebanking/common/util"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/web-teller/repo"
 )
 
 func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
@@ -24,25 +24,25 @@ func (h *WebTellerHandler) TransferPosting(_ context.Context, req *wtproto.APIRE
 
 	var srcAccount string
 	switch req.Params["core"] {
-		case "K":
-			srcAccount = "1000000000"
-		case "S":
-			srcAccount = "6000000000"
-		default:
-			srcAccount = "1000000000"
+	case "K":
+		srcAccount = "1000000000"
+	case "S":
+		srcAccount = "6000000000"
+	default:
+		srcAccount = "1000000000"
 	}
 
 	params := map[string]string{
-		"tellerID":          req.Params["tellerID"],
-		"tellerPass":        req.Params["tellerPass"],
-		"txType":            req.Params["txType"],
-		"amount": 			 req.Params["amount"],
-		"fee":               req.Params["fee"],
-		"srcAccount":		 srcAccount,
-		"destAccount":       req.Params["destAccount"],
-		"referenceNumber":   util.RandomNumber(12),
-		"termType":          "6010",
-		"termId": 			 "WTELLER",
+		"tellerID":        req.Params["tellerID"],
+		"tellerPass":      req.Params["tellerPass"],
+		"txType":          req.Params["txType"],
+		"amount":          req.Params["amount"],
+		"fee":             req.Params["fee"],
+		"srcAccount":      srcAccount,
+		"destAccount":     req.Params["destAccount"],
+		"referenceNumber": util.RandomNumber(12),
+		"termType":        "6010",
+		"termId":          "WTELLER",
 	}
 
 	gateMsg := transport.SendToGate("gate.shared", req.TxType, params)

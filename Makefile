@@ -7,7 +7,7 @@ PATHNEXUS := ebanking/ibmb
 
 .PHONY: build
 build:
-	GIT_TERMINAL_PROMPT=1 GO111MODULE=on GOPRIVATE=gitlab.pactindo.com CGO_ENABLED=0 $(BUILDCMD) $(OUTPUT) main.go && upx $(OUTPUT)
+	GIT_TERMINAL_PROMPT=1 GO111MODULE=on GOPRIVATE=git.pactindo.com CGO_ENABLED=0 $(BUILDCMD) $(OUTPUT) main.go && upx $(OUTPUT)
 
 .PHONY: linux
 linux:

@@ -4,12 +4,12 @@ import (
 	"context"
 	"strconv"
 
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
+	"git.pactindo.com/ebanking/web-teller/repo"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/trycatch"
 
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 )
 
 func (h *WebTellerHandler) UpdateCetak(_ context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {

@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	"gitlab.pactindo.com/ebanking/common/util"
-	pfee "gitlab.pactindo.com/ebanking/proto-common/fee"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	"git.pactindo.com/ebanking/common/util"
+	pfee "git.pactindo.com/ebanking/proto-common/fee"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 	"strconv"
 )
 
@@ -41,11 +41,11 @@ func (h *WebTellerHandler) TransferInquiry(ctx context.Context, req *wtproto.API
 		"core": req.Params["core"],
 		// "tellerID":          req.Params["tellerID"],
 		// "tellerPass":        req.Params["tellerPass"],
-		"txType":            req.Params["txType"],
-		"destAccount":       req.Params["destAccount"],
-		"referenceNumber":   util.PadLeftZero(req.Headers["Request-ID"], 12),
-		"termType":          "6010",
-		"termId": 			 "WTELLER",
+		"txType":          req.Params["txType"],
+		"destAccount":     req.Params["destAccount"],
+		"referenceNumber": util.PadLeftZero(req.Headers["Request-ID"], 12),
+		"termType":        "6010",
+		"termId":          "WTELLER",
 	})
 
 	if gateMsg.ResponseCode == "00" {

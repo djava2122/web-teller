@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/pg"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/pg"
 )
 
 type MTransaction struct {
@@ -325,7 +325,7 @@ func (_ transaction) TransactionReport(filter string) (result []TransactionRepor
 
 func (_ transaction) FilterTransaction(filter string, page, pageSize int) (result []TransactionReport, rowCount int, err error) {
 	queryGetTransaction := "select feature_name,feature_code,feature_group_code,feature_group_name,transaction_date,transaction_amount,fee,transaction_status,reference_number,customer_reference,currency_code,createdby,branch_code,branch_name, trx_type, src_account, response_code from t_transaction "
-	rows, err := pg.DB.Query(fmt.Sprintf("%v %v LIMIT %v OFFSET %v", queryGetTransaction, filter, pageSize, (page - 1) * pageSize))
+	rows, err := pg.DB.Query(fmt.Sprintf("%v %v LIMIT %v OFFSET %v", queryGetTransaction, filter, pageSize, (page-1)*pageSize))
 	if err != nil {
 		return nil, 0, err
 	}

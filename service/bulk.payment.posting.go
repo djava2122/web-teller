@@ -7,17 +7,17 @@ import (
 	"strings"
 	"time"
 
+	"git.pactindo.com/ebanking/web-teller/model"
+	"git.pactindo.com/ebanking/web-teller/repo"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fastjson"
-	"gitlab.pactindo.com/ebanking/web-teller/model"
-	"gitlab.pactindo.com/ebanking/web-teller/repo"
 
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	"gitlab.pactindo.com/ebanking/common/util"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	"git.pactindo.com/ebanking/common/util"
 
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 )
 
 func (h *WebTellerHandler) BulkPaymentPosting(_ context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {

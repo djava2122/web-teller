@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"gitlab.pactindo.com/ebanking/common/log"
-	"gitlab.pactindo.com/ebanking/common/transport"
-	"gitlab.pactindo.com/ebanking/common/trycatch"
-	wtproto "gitlab.pactindo.com/ebanking/web-teller/proto"
+	"git.pactindo.com/ebanking/common/log"
+	"git.pactindo.com/ebanking/common/transport"
+	"git.pactindo.com/ebanking/common/trycatch"
+	wtproto "git.pactindo.com/ebanking/web-teller/proto"
 )
 
 func (h *WebTellerHandler) CashTellerInquiry(ctx context.Context, req *wtproto.APIREQ, res *wtproto.APIRES) error {
@@ -38,14 +38,14 @@ func (h *WebTellerHandler) CashTellerInquiry(ctx context.Context, req *wtproto.A
 			//})
 
 			//if userInfo.ResponseCode == "00" {
-				data := make(map[string]interface{})
-				data["tellerName"] = getData(gateMsg.Data, "userName")
-				data["role"] = ParseRoleTeller(getData(gateMsg.Data, "kdSPV1"))
-				data["branchCode"] = getData(gateMsg.Data, "companyCode")
-				data["beginBalance"] = getData(gateMsg.Data, "saldoAwalHari")
-				data["CurrentBalance"] = getData(gateMsg.Data, "saldoSekarang")
+			data := make(map[string]interface{})
+			data["tellerName"] = getData(gateMsg.Data, "userName")
+			data["role"] = ParseRoleTeller(getData(gateMsg.Data, "kdSPV1"))
+			data["branchCode"] = getData(gateMsg.Data, "companyCode")
+			data["beginBalance"] = getData(gateMsg.Data, "saldoAwalHari")
+			data["CurrentBalance"] = getData(gateMsg.Data, "saldoSekarang")
 
-				res.Response, _ = json.Marshal(successResp(data))
+			res.Response, _ = json.Marshal(successResp(data))
 			//}
 
 		} else {
