@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	// Define service //
+	// Define service ////
 	svc := micro.NewService(
 		micro.ServiceName("web-teller"),
 		micro.Config(
